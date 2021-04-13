@@ -1,0 +1,15 @@
+language: python
+
+python:
+  - "3.9"
+  - "pypy3"
+
+install:
+  - pip install pipenv
+  - pipenv install
+
+script:
+  - pipenv run test
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
