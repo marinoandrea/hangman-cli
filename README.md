@@ -1,7 +1,9 @@
 # hangman-software-testing
+
+[![Build Status](https://www.travis-ci.com/marinoandrea/hangman-software-testing.svg?token=oQZSVvHp9LbB8M8icK4Z&branch=main)](https://www.travis-ci.com/marinoandrea/hangman-software-testing)
+[![codecov](https://codecov.io/gh/marinoandrea/hangman-software-testing/branch/main/graph/badge.svg?token=0PZNNSXFL5)](https://codecov.io/gh/marinoandrea/hangman-software-testing)
+
 Project repository for the Software Testing course at VU
-
-
 
 # Choose a topic
 In this project, we chose to create the Hangman Game.
