@@ -1,29 +1,43 @@
-class colors:
+from dataclasses import dataclass
+from enum import Enum, unique
+
+
+@unique
+class colors(Enum):
+    value: str
     RED = '\033[31m'
     END = '\033[0m'
     BLUE = '\033[96m'
 
+    def __str__(self) -> str:
+        return self.value
 
-# The Configurations contains all the configurations that can be done through the
-# command line arguments.
+
+@dataclass
 class Configurations:
-    def __init(self, lives=10, min_length=2, max_length=10):
-        pass
+    """
+    The Configurations contains all the configurations that can be done
+    through the command line arguments.
+    """
+    lives: int
+    min_length: int
+    max_length: int
 
 
-
-# The state of the system describes the to be guessed word, 
-# all the wrongly guessed characters, the current progress of the word, 
-# the number of Lives and the configuration options.
 class State:
-    def __init__(self, configurations):
+    """
+    The state of the system describes the to be guessed word,
+    all the wrongly guessed characters, the current progress of the word,
+    the number of Lives and the configuration options.
+    """
+
+    def __init__(self, configurations: Configurations):
         self.lives = configurations.lives
 
-        
 
-def print_error(string):
+def print_error(string: str):
     print(f"{colors.RED}{string}{colors.END}")
 
-def print_info(string):
-    print(f"{colors.BLUE}{string}{colors.END}")
 
+def print_info(string: str):
+    print(f"{colors.BLUE}{string}{colors.END}")
