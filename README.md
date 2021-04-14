@@ -170,7 +170,7 @@ ___
 
 - The system shall inform the Player if an invalid input was entered by writing an error message to the screen, without changing the current State.
 
-- The system shall inform the Player whether it guessed the word after a Game instance has ended.
+- The system shall **inform** the Player whether it guessed the word after a Game instance has ended.
 
 - The system shall ask the Player after a Game instance has ended to start a new Game instance, or to gracefully terminate the program.
 
@@ -181,6 +181,8 @@ ___
 - The system shall print error messages to the Player in <span style="color:#BF616A">red</span> (#BF616A).
 
 - The system shall print informational messages to the Player in <span style="color:#5E81AC">blue</span> (#5E81AC).
+
+- The system shall print regular State messages to the Player in the default color of the terminal.
 
 ### *Performance requirements*
 <!-- (nonfunctional requirements) -->
