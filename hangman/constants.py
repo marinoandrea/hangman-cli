@@ -1,0 +1,3 @@
+MAX_LIVES: int = 10
+MIN_LENGTH: int = 2
+MAX_LENGTH: int = 2000
