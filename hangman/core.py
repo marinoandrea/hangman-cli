@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from hangman.constants import MAX_LENGTH, MAX_LIVES, MIN_LENGTH
 
@@ -32,5 +32,7 @@ class State:
     the number of Lives and the configuration options.
     """
     target_word: str
+    current_word: List[str]
     current_lives: int
     guesses: List[Guess]
+    current_guess: Optional[Guess]
