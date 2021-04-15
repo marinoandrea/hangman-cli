@@ -130,6 +130,7 @@ ___
 <!-- (functional requirements) -->
 - The system shall read Player-provided command-line arguments as specified in the `User Interfaces` section on startup. If a certain option is repeated (that is, there is more than one argument for a given option), the system shall use the last value. 
     - Upon receiving the `-m` or `--minimum-length` option followed by an argument, as long as the program is running, the system shall not pick words with a length lower than the argument. 
+    If the provided value is larger than the specified `--maximum-length`, the system shall producean error message and gracefully quit.
     If the provided value is larger than the maximum word length in the game's dictionary then the system shall produce an error message and gracefully quit.
     If the provided value is not an integer, it is less or equal to 2, or larger than the maximum length, the system shall produce an error message indicating that the given argument is incorrect. 
 
