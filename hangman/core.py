@@ -51,7 +51,7 @@ class State:
     def new(word: str, lives: int):
         return State(
             target_word = word,
-            current_word = ['_' for c in word],
+            current_word = ['_' for _ in word],
             current_lives = lives
         )
 
