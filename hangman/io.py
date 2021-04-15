@@ -3,7 +3,7 @@ from enum import Enum, unique
 from functools import wraps
 from typing import Callable, List
 
-from hangman.constants import MAX_LENGTH, MAX_LIVES, MIN_LENGTH
+from hangman.constants import MAX_LENGTH, MAX_LIVES, MIN_LENGTH, ANIMATIONS
 from hangman.core import Configurations, Guess, State
 
 
@@ -122,6 +122,18 @@ def get_guess(game_state: State) -> Guess:
     error_msg = "the word to be guessed has a different length"
     print_error(error_msg)
     raise ValueError(error_msg)
+
+
+
+def display(state: State):
+    curr_animation = MAX_LIVES - state.current_lives
+    if curr_animation >= len(ANIMATIONS):
+        raise ValueError("Lives is inconsistent with animations.")
+
+    print("Word: {}".format(" ".join(state.current_word)))
+    if state.current_guess is not None:
+        print("Guess: {}".format(state.current_guess.guess))
+    print(ANIMATIONS[curr_animation])
 
 
 @prompt

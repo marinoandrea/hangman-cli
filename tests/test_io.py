@@ -8,9 +8,10 @@ from io import StringIO
 from typing import List
 
 import pytest as pt
-from hangman.core import Configurations, State
+from hangman.core import Configurations, State, Guess
+from hangman.constants import ANIMATIONS, MAX_LIVES
 from hangman.io import (get_guess, get_play_new_game, parse_args, print_error,
-                        print_info)
+                        print_info, display)
 
 
 def _check_error(capsys: pt.CaptureFixture, expected: str):
@@ -141,7 +142,7 @@ def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
     a guess that could potentially be valid.
     """
     # assuming the initial dummy target word is "penguin"
-    state = State(target_word="penguin", current_lives=1, guesses=[])
+    state = State(target_word="penguin", current_lives=1, guesses=[], current_guess=None, current_word=[])
 
     # single character guess
     monkeypatch.setattr('sys.stdin', StringIO("c"))
@@ -165,6 +166,28 @@ def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
         f"Please enter your guess: \033[31merror: {expected}\033[0m\n"
         + "Please enter your guess: "
     )
+
+
+def test_initial_display(capsys: pt.CaptureFixture):
+    """
+    Tests the display function at the start of a game(when no guess is made.)
+    """
+    state = State(target_word="penguin", current_lives=10, guesses=[], current_guess=None, current_word=["_", "_", "_"])
+    display(state)
+    captured = capsys.readouterr()
+    expected_output = ["Word: _ _ _", ANIMATIONS[0], ""]
+    assert captured.out == "\n".join(expected_output)
+
+
+def test_dead_display(capsys: pt.CaptureFixture):
+    """
+    Tests the display function at the end of a game(when no more guesses can be made.)
+    """
+    state = State(target_word="penguin", current_lives=0, guesses=[], current_guess=Guess("X"), current_word=["_", "_", "_"])
+    display(state)
+    captured = capsys.readouterr()
+    expected_output = ["Word: _ _ _", "Guess: X", ANIMATIONS[MAX_LIVES], ""]
+    assert captured.out == "\n".join(expected_output)
 
 
 def test_get_play_new_game(

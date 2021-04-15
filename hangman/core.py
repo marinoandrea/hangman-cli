@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum, unique
-from typing import List
+from typing import List, Optional
 
 from hangman.constants import MAX_LENGTH, MAX_LIVES, MIN_LENGTH
 
@@ -41,9 +41,19 @@ class State:
     the number of Lives and the configuration options.
     """
     target_word: str
+    current_word: List[str]
     current_lives: int
+    current_guess: Optional[Guess] = None
     guesses: List[Guess] = field(default_factory=lambda: [])
     is_running: bool = True
+
+    @staticmethod
+    def new(word: str, lives: int):
+        return State(
+            target_word = word,
+            current_word = ['_' for _ in word],
+            current_lives = lives
+        )
 
     @staticmethod
     def from_config(config: Configurations) -> 'State':
@@ -52,10 +62,7 @@ class State:
             config.max_length,
             config.difficulty
         )
-        return State(
-            target_word=target_word,
-            current_lives=config.lives,
-        )
+        return State.new(target_word, current_lives)
 
 
 def update_game(game_state: State):
