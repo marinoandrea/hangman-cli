@@ -9,7 +9,8 @@ from typing import List
 
 import pytest as pt
 from hangman.core import Configurations, State
-from hangman.io import get_guess, parse_args, print_error, print_info
+from hangman.io import (get_guess, get_play_new_game, parse_args, print_error,
+                        print_info)
 
 
 def _check_error(capsys: pt.CaptureFixture, expected: str):
@@ -153,13 +154,37 @@ def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
     assert "opossum" == res.guess
 
     captured = capsys.readouterr()  # empty stdout
-    # word that does not equal the length
-    try:
-        monkeypatch.setattr("sys.stdin", StringIO("polarbear"))
-        res = get_guess(state)
 
-    except Exception as e:
-        captured = capsys.readouterr()
-        expected = "the word to be guessed has a different length"
-        assert captured.out == f"Please enter your guess: \033[31merror: {expected}\033[0m\n"
-        assert isinstance(e, ValueError)
+    # while the word has a different length the user is reprompted to guess
+    monkeypatch.setattr("sys.stdin", StringIO('pengui\npenguix'))
+    res = get_guess(state)
+
+    captured = capsys.readouterr()
+    expected = "the word to be guessed has a different length"
+    assert captured.out == (
+        f"Please enter your guess: \033[31merror: {expected}\033[0m\n"
+        + "Please enter your guess: "
+    )
+
+
+def test_get_play_new_game(
+    monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture
+):
+    """
+    Basic IO test. This tests whether the get_play_new_game function returns
+    a boolean answer based on a correct [y/n] input.
+    """
+    monkeypatch.setattr('sys.stdin', StringIO("a\ny"))
+    res = get_play_new_game()
+
+    captured = capsys.readouterr()
+    assert captured.out == (
+        "Do you want to start a new game? [y/n] " +
+        "\033[31merror: you must answer yes (y) or no (n)\033[0m\n" +
+        "Do you want to start a new game? [y/n] "
+    )
+    assert res
+
+    monkeypatch.setattr('sys.stdin', StringIO("n"))
+    res = get_play_new_game()
+    assert not res
