@@ -179,9 +179,9 @@ ___
 
 - The system shall thank the Player for playing the game when it gracefully terminates.
 
-- The system shall print error messages to the Player in <span style="color:#BF616A">red</span> (#BF616A).
+- The system shall print error messages to the Player in <span style="color:#BF616A">red</span>.
 
-- The system shall print informational messages to the Player in <span style="color:#5E81AC">blue</span> (#5E81AC).
+- The system shall print informational messages to the Player in <span style="color:#5E81AC">blue</span>.
 
 - The system shall print regular State messages to the Player in the default color of the terminal.
 
