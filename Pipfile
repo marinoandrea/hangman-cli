@@ -15,4 +15,4 @@ coverage = "*"
 python_version = "3.9"
 
 [scripts]
-test = "coverage run -m pytest --cov=./"
+test = "coverage run -m pytest --cov=./hangman"

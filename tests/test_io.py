@@ -3,9 +3,33 @@ This file contains all basic IO tests for the game Hangman.
 This will test whether the basic messages are correctly formatted
 and whether the Player can input data correctly.
 '''
+from contextlib import contextmanager
+from typing import List
+from io import StringIO
+
+import sys
 import pytest as pt
-from hangman import print_error, print_info, parse_args, Configurations
-from typing import List, Tuple
+from hangman import Configurations, State, Guess
+from hangman import parse_args, print_error, print_info, get_guess, current_state
+
+
+def _check_error(capsys: pt.CaptureFixture, expected: str):
+    captured = capsys.readouterr()
+    assert captured.out == f"\033[31merror: {expected}\033[0m\n"
+
+
+def _check_info(capsys: pt.CaptureFixture, info: str):
+    captured = capsys.readouterr()
+    assert captured.out == f"\033[96minfo: {info}\033[0m\n"
+
+
+@contextmanager
+def check_value_error(capsys: pt.CaptureFixture, err: str):
+    try:
+        yield
+    except Exception as e:
+        assert isinstance(e, ValueError)
+        _check_error(capsys, err)
 
 
 def test_print_error(capsys: pt.CaptureFixture):
@@ -14,8 +38,7 @@ def test_print_error(capsys: pt.CaptureFixture):
     actually formatted to be red.
     """
     print_error("test")
-    captured = capsys.readouterr()
-    assert captured.out == "\033[31mtest\033[0m\n"
+    _check_error(capsys, "test")
 
 
 def test_print_info(capsys: pt.CaptureFixture):
@@ -24,20 +47,20 @@ def test_print_info(capsys: pt.CaptureFixture):
     actually formatted to be blue.
     """
     print_info("congratulations, you have won this game!")
-    captured = capsys.readouterr()
-    assert captured.out == "\033[96mcongratulations, you have won this game!\033[0m\n"
+    _check_info(capsys, "congratulations, you have won this game!")
+
 
 def test_parse_args_length(capsys: pt.CaptureFixture):
     """
-    Tests whether the arugment parser behaves correctly when length is inputted.
+    Tests whether the arugment parser behaves correctly when
+    length is inputted.
     """
-    MIN: int = 0
-    MAX: int = 1
-    l_tests: List[Tuple[str, str]] = [("4", "7"), ("2", "500"), ("6", "4"), ("0", "2")]
+    MIN = 0
+    MAX = 1
+    l_tests = [("4", "7"), ("2", "500"), ("6", "4"), ("0", "2")]
 
     # individual length tests in-range
     argList: List[str] = ["-m", l_tests[0][MIN]]
-    res: Configurations
     res = parse_args(argList)
     assert res.min_length == int(l_tests[0][MIN])
 
@@ -45,8 +68,7 @@ def test_parse_args_length(capsys: pt.CaptureFixture):
     res = parse_args(argList)
     assert res.max_length == int(l_tests[0][MAX])
 
-    argList: List[str] = ["--minimum-length", l_tests[0][MIN]]
-    res: Configurations
+    argList = ["--minimum-length", l_tests[0][MIN]]
     res = parse_args(argList)
     assert res.min_length == int(l_tests[0][MIN])
 
@@ -73,22 +95,19 @@ def test_parse_args_length(capsys: pt.CaptureFixture):
     ### error tests ###
 
     # min higher than max
-    argList = ["-m", l_tests[2][MIN], "-M", l_tests[2][MAX]]
-    parse_args(argList)
-    captured = capsys.readouterr()
-    assert captured.out == "\033[31merror: minimum length value higher than maximum length value\033[0m\n"
+    with check_value_error(capsys, "minimum length value higher than maximum length value"):
+        argList = ["-m", l_tests[2][MIN], "-M", l_tests[2][MAX]]
+        parse_args(argList)
 
     # missing value
-    argList = ["-m"]
-    parse_args(argList)
-    captured = capsys.readouterr()
-    assert captured.out == "\033[31merror: missing value\033[0m\n"
+    with check_value_error(capsys, "missing_value"):
+        argList = ["-m"]
+        parse_args(argList)
 
     # too low values
-    argList = ["-m", l_tests[3][MIN], "-M", l_tests[2][MAX]]
-    parse_args(argList)
-    captured = capsys.readouterr()
-    assert captured.out == "\033[31merror: minimum length value too low\033[0m\n"
+    with check_value_error(capsys, "minimum length value too low"):
+        argList = ["-m", l_tests[3][MIN], "-M", l_tests[2][MAX]]
+        parse_args(argList)
 
 
 def test_parse_args_lives(capsys: pt.CaptureFixture):
@@ -97,17 +116,49 @@ def test_parse_args_lives(capsys: pt.CaptureFixture):
     """
     res: Configurations
     for i in range(11, -1, -1):
-        res = parse_args(["-l", str(i)])
-        if i > 10:
-            captured = capsys.readouterr()
-            assert captured.out == "\033[31merror: that many lives make the game too easy\033[0m\n"
-            continue
-        if i < 1:
-            captured = capsys.readouterr()
-            assert captured.out == "\033[31merror: having less than 1 live is not advised\033[0m\n"
-            continue
+        try:
+            res = parse_args(["-l", str(i)])
+            # an exception should be thrown here
+            if i > 10 or i < 1:
+                assert False
+        except Exception as e:
+            if i > 10:
+                _check_error(capsys, "that many lives make the game too easy")
+                assert isinstance(e, ValueError)
+                continue
+            if i < 1:
+                _check_error(capsys, "having less than 1 live is not advised")
+                assert isinstance(e, ValueError)
+                continue
         assert res.lives == i
     res = parse_args(["--lives", "5"])
     assert res.lives == 5
 
+def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
+    """
+    Basic IO test. This tests whether the get_guess functions returns a guess that could potentially be valid.
+    """
+    # assuming the initial dummy target word is "penguin"
+
+    # single character guess
+    monkeypatch.setattr('sys.stdin', StringIO("c"))
+    res: Guess = get_guess()
+    assert "c" == res.guess
+
+    # word of the same length guess
+    monkeypatch.setattr("sys.stdin", StringIO("opossum"))
+    res = get_guess()
+    assert "opossum" == res.guess
+
+    captured = capsys.readouterr() # empty stdout
+    # word that does not equal the length
+    try:
+        monkeypatch.setattr("sys.stdin", StringIO("polarbear"))
+        res = get_guess()
+
+    except Exception as e:
+        captured = capsys.readouterr()
+        expected = "the word to be guessed has a different length"
+        assert captured.out == f"Please enter your guess: \033[31merror: {expected}\033[0m\n"
+        assert isinstance(e, ValueError)
     
