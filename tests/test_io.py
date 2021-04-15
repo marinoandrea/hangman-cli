@@ -5,14 +5,17 @@ and whether the Player can input data correctly.
 '''
 from contextlib import contextmanager
 from typing import List
+from io import StringIO
 
+import sys
 import pytest as pt
-from hangman import Configurations, parse_args, print_error, print_info
+from hangman import Configurations, State, Guess
+from hangman import parse_args, print_error, print_info, get_guess, current_state
 
 
-def _check_error(capsys: pt.CaptureFixture, err: str):
+def _check_error(capsys: pt.CaptureFixture, expected: str):
     captured = capsys.readouterr()
-    assert captured.out == f"\033[31merror: {err}\033[0m\n"
+    assert captured.out == f"\033[31merror: {expected}\033[0m\n"
 
 
 def _check_info(capsys: pt.CaptureFixture, info: str):
@@ -130,3 +133,32 @@ def test_parse_args_lives(capsys: pt.CaptureFixture):
         assert res.lives == i
     res = parse_args(["--lives", "5"])
     assert res.lives == 5
+
+def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
+    """
+    Basic IO test. This tests whether the get_guess functions returns a guess that could potentially be valid.
+    """
+    # assuming the initial dummy target word is "penguin"
+
+    # single character guess
+    monkeypatch.setattr('sys.stdin', StringIO("c"))
+    res: Guess = get_guess()
+    assert "c" == res.guess
+
+    # word of the same length guess
+    monkeypatch.setattr("sys.stdin", StringIO("opossum"))
+    res = get_guess()
+    assert "opossum" == res.guess
+
+    captured = capsys.readouterr() # empty stdout
+    # word that does not equal the length
+    try:
+        monkeypatch.setattr("sys.stdin", StringIO("polarbear"))
+        res = get_guess()
+
+    except Exception as e:
+        captured = capsys.readouterr()
+        expected = "the word to be guessed has a different length"
+        assert captured.out == f"Please enter your guess: \033[31merror: {expected}\033[0m\n"
+        assert isinstance(e, ValueError)
+    
