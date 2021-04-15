@@ -16,3 +16,4 @@ python_version = "3.9"
 
 [scripts]
 test = "coverage run -m pytest --cov=."
+start = "python main.py"
