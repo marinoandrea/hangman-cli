@@ -4,13 +4,12 @@ This will test whether the basic messages are correctly formatted
 and whether the Player can input data correctly.
 '''
 from contextlib import contextmanager
-from typing import List
 from io import StringIO
+from typing import List
 
-import sys
 import pytest as pt
-from hangman import Configurations, State, Guess
-from hangman import parse_args, print_error, print_info, get_guess, current_state
+from hangman.core import Configurations, State
+from hangman.io import get_guess, parse_args, print_error, print_info
 
 
 def _check_error(capsys: pt.CaptureFixture, expected: str):
@@ -134,31 +133,33 @@ def test_parse_args_lives(capsys: pt.CaptureFixture):
     res = parse_args(["--lives", "5"])
     assert res.lives == 5
 
+
 def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
     """
-    Basic IO test. This tests whether the get_guess functions returns a guess that could potentially be valid.
+    Basic IO test. This tests whether the get_guess functions returns
+    a guess that could potentially be valid.
     """
     # assuming the initial dummy target word is "penguin"
+    state = State(target_word="penguin", current_lives=1, guesses=[])
 
     # single character guess
     monkeypatch.setattr('sys.stdin', StringIO("c"))
-    res: Guess = get_guess()
+    res = get_guess(state)
     assert "c" == res.guess
 
     # word of the same length guess
     monkeypatch.setattr("sys.stdin", StringIO("opossum"))
-    res = get_guess()
+    res = get_guess(state)
     assert "opossum" == res.guess
 
-    captured = capsys.readouterr() # empty stdout
+    captured = capsys.readouterr()  # empty stdout
     # word that does not equal the length
     try:
         monkeypatch.setattr("sys.stdin", StringIO("polarbear"))
-        res = get_guess()
+        res = get_guess(state)
 
     except Exception as e:
         captured = capsys.readouterr()
         expected = "the word to be guessed has a different length"
         assert captured.out == f"Please enter your guess: \033[31merror: {expected}\033[0m\n"
         assert isinstance(e, ValueError)
-    
