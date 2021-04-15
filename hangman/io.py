@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 from enum import Enum, unique
-from typing import List
+from functools import wraps
+from typing import Callable, List
 
 from hangman.constants import MAX_LENGTH, MAX_LIVES, MIN_LENGTH, ANIMATIONS
 from hangman.core import Configurations, Guess, State
@@ -92,11 +93,26 @@ def parse_args(argList: List[str]) -> Configurations:
         max_length=args.maximum_length
     )
 
-# Get user input from Stdin
+
+def prompt(f: Callable) -> Callable:
+    """
+    Prompts the user to input a value until either the value is legal
+    or an exception different than `ValueError` is raised.
+    """
+    @wraps(f)
+    def inner(*args, **kwargs):
+        while True:
+            try:
+                return f(*args, **kwargs)
+            except ValueError:
+                continue
+    return inner
 
 
+@prompt
 def get_guess(game_state: State) -> Guess:
     user_input = input("Please enter your guess: ")
+
     if len(user_input) == 1:
         return Guess(guess=user_input)
 
@@ -118,3 +134,13 @@ def display(state: State):
     if state.current_guess is not None:
         print("Guess: {}".format(state.current_guess.guess))
     print(ANIMATIONS[curr_animation])
+
+
+@prompt
+def get_play_new_game() -> bool:
+    user_input = input("Do you want to start a new game? [y/n] ")
+    if user_input not in ['y', 'n']:
+        error_msg = 'you must answer yes (y) or no (n)'
+        print_error(error_msg)
+        raise ValueError(error_msg)
+    return user_input == 'y'

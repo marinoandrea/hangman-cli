@@ -1,7 +1,15 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Enum, unique
 from typing import List, Optional
 
 from hangman.constants import MAX_LENGTH, MAX_LIVES, MIN_LENGTH
+
+
+@unique
+class Difficulty(Enum):
+    EASY = 'easy'
+    MEDIUM = 'medium'
+    HARD = 'hard'
 
 
 @dataclass(frozen=True)
@@ -13,6 +21,7 @@ class Configurations:
     lives: int = MAX_LIVES
     min_length: int = MIN_LENGTH
     max_length: int = MAX_LENGTH
+    difficulty: Difficulty = Difficulty.MEDIUM
 
 
 @dataclass
@@ -34,5 +43,28 @@ class State:
     target_word: str
     current_word: List[str]
     current_lives: int
-    guesses: List[Guess]
     current_guess: Optional[Guess]
+    guesses: List[Guess] = field(default_factory=lambda: [])
+    is_running: bool = True
+
+    @staticmethod
+    def from_config(config: Configurations) -> 'State':
+        target_word = pick_word(
+            config.min_length,
+            config.max_length,
+            config.difficulty
+        )
+        return State(
+            target_word=target_word,
+            current_lives=config.lives,
+        )
+
+
+def update_game(game_state: State):
+    raise NotImplementedError()
+
+
+def pick_word(
+    min_length: int, max_length: int, max_difficulty: Difficulty
+) -> str:
+    raise NotImplementedError()
