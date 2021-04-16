@@ -38,10 +38,11 @@ The goal of the hangman game product is to provide an application to play the si
 
 - **Player**: The user that will use the system to guess words.
 
-- **Difficulty**: <!-- NOTE: we have different options, damian proposed to use this https://www3.nd.edu/~busiforc/handouts/cryptography/letterfrequencies.html letter classification in order to rank each word using the sum of its components frequency --> 
-An extremely complex algorithm is used to divide words in certain classes, based on their probability of being guessed in the game of Hangman.
+- **Difficulty**: Every word gets as its difficulty value, the sum of the weights of every character in the word. The weight of a character is defined as the inverse of its proportion(1).
+    Proportion describes how common a character is in a word compared to the least occuring character.
+    A higher proportion denotes a higher probability of the character occuring in word, therefore, the inverse gives a lower weight to characters occuring often.
 
-- **Lives**: The limit of the number of wrong guesses that the Player can make. 
+- **Lives**: The limit of the number of wrong guesses that the Player can make.
 
 - **State**: The state of the system describes the to be guessed word, all the wrongly guessed characters, the current progress of the word, the number of Lives and the configuration options.
 
@@ -51,9 +52,12 @@ An extremely complex algorithm is used to divide words in certain classes, based
 
 - **Game Word**: A Game Word is any string containing only Game Characters.
 
-- **Game Dictionary**: A collection of files embedded in the program that contain lists of words classified by their *Difficulty*. 
+- **Game Dictionary**: A collection of files embedded in the program containing lists of Game Words classified by their *Difficulty* into three groups(easy, medium, hard).
+    The groups are determined based of the median difficulty of words in one file.
 
 ### *References*
+1) The [proportion source](https://www3.nd.edu/~busiforc/handouts/cryptography/letterfrequencies.html) used for determining the character proportion values.
+
 
 ### *Overview*
 ___
@@ -64,30 +68,19 @@ The hangman game product is completely self-contained.
 
 
 #### *System interfaces*
-Since the hangman game product is completely self-contained there are no system interfaces.
+Since the hangman game product is completely self-contained, there are no system interfaces.
 
 #### User interfaces
 
-The Players will interface with the program using the command line. 
+The Players will interface with the program using the command line.
 The Player can start a new game simply by running the binary that will be provided.
 
 The Player can customize the game using the following command line options:
 - `-m --min-length` a number specifying the minimum word length that can be randomly selected. It defaults to 2
 - `-M --max-length` a number specifying the maximum word length that can be randomly selected. It defaults to undefined
 - `-l --lives` a number between 1 and 10 that specifies the number of lives for the next game, defaults to 10
-- `-d --difficulty` a number between 1 and 10 that specifies the difficulty for the next game, defaults to 5
+- `-d --difficulty` a string being either: 'easy', 'medium', or 'hard', defaults to 'medium'
 <!-- - `-j --jargon` one of: 'computer science', 'mathematics', 'english', defaults to 'english'. -->
-
-On initialization, the program will print basic instructions and rules to the standard output. 
-The Player will then be able to choose wether to start a game or to gracefully terminate the application. 
-
-After the game has started, the program will prompt the Player to specify a single character or to guess the full word on each turn. It will then print a graphical representation of the hangman state followed by one of these responses:
-- **Error** message
-- **Success** message
-
-The possible messages are specified in the 'Functions' section.
-
-When a Player reaches its end (by win/lose conditions), they get notified by an end game message. After the game is over the program prompts the Player to choose whether to start a new game or to terminate the application gracefully. 
 
 #### Hardware interfaces
 N/A
@@ -98,9 +91,9 @@ N/A
 #### Communications interfaces
 N/A
 
-#### Memory constraints 
+#### Memory constraints
 The user's machine should have a minimum of 50Mb of free RAM in order to run this application.
-This constraint accounts for both the Python runtime size and the program size. 
+This constraint accounts for both the Python runtime size and the program size.
 
 #### Operations
 N/A
@@ -113,7 +106,7 @@ N/A
 ### *User characteristics*
 
 ### *Constraints*
-- The system should only make use of standard libraries.
+- The system should only make use of Python standard libraries.
 
 ### *Assumptions and dependencies*
 
@@ -126,52 +119,62 @@ ___
 
 ### *External interfaces*
 
-### *Functions* 
+### *Functions*
 <!-- (functional requirements) -->
-- The system shall read Player-provided command-line arguments as specified in the `User Interfaces` section on startup. If a certain option is repeated (that is, there is more than one argument for a given option), the system shall use the last value. 
-    - Upon receiving the `-m` or `--minimum-length` option followed by an argument, as long as the program is running, the system shall not pick words with a length lower than the argument. 
+- The system shall read Player-provided command-line arguments as specified in the `User Interfaces` section on startup. If a certain option is repeated (that is, there is more than one argument for a given option), the system shall use the last value.
+    - Upon receiving the `-m` or `--minimum-length` option followed by an argument, as long as the program is running, the system shall not pick words with a length lower than the argument.
     If the provided value is larger than the specified `--maximum-length`, the system shall producean error message and gracefully quit.
     If the provided value is larger than the maximum word length in the game's dictionary then the system shall produce an error message and gracefully quit.
-    If the provided value is not an integer, it is less or equal to 2, or larger than the maximum length, the system shall produce an error message indicating that the given argument is incorrect. 
+    If the provided value is not an integer, it is less or equal to 2, or larger than the maximum length, the system shall produce an error message indicating that the given argument is incorrect.
 
     - Upon receiving the `-M` or `--maximum-length` option followed by an argument, as long as the program is running, the system shall not pick words with a length larger than the argument.
-    If the provided value is not an integer, it is less or equal to 2, or less than the specified value for the minimum length, the system shall produce an error message indicating that the given argument is incorrect. 
+    If the provided value is not an integer, it is less or equal to 2, or less than the specified value for the minimum length, the system shall produce an error message indicating that the given argument is incorrect.
 
     - Upon receiving the `-l` or `--lives` option followed by an argument, the system shall verify that the given argument is an integer and in the defined range(as specified in the `User Interfaces` section).
     If the argument is not an integer or outside this defined range, the system shall produce an error message indicating the given argument is incorrect and what values are correct. After this error message the system stops executing.
     If the argument is in this defined range, the system shall use the given argument as the number of lives for all games started during
-    this invocation. 
+    this invocation.
 
-    - Upon receiving the `-d` or `--difficulty`, the system shall <!-- TODO: we do not know how difficulty will work yet -->
+    - Upon receiving the `-d` or `--difficulty`, the system shall verify that the given argument is a string matching one of the possible difficulty levels.
+    If the argument does not match any of the possible difficulty levels, the system shall produce an error message indicating the given argument is incorrect and what are correct.
+    After this error, the system shall stop executing.
 
 - After processing the command-line arguments, the system shall start an instance of a game.
 
 - On the creation of a game instance, the system shall perform the following initialisation steps:
     - The system shall initialize the number of remaining lives in the current instance to the number of lives specified by the command-line `lives` parameter.
-    
+
     - The system shall pick a word from the Game Dictionary based on the difficulty level specified by the command-line `difficulty` parameter, the `minimum-length` parameter and the `maximum-length` parameter.
+    If no word for configuration can be found, the system shall inform the Player and exit.
 
 - After the initialisation step of a game instance, the system shall start a game loop with the created instance.
     - The system shall perform the following three steps in a game loop:
-        - The system shall display the current State. <!-- TODO: Specify display -->
-        - The system shall prompt the Player for their next guess. 
-        A valid guess can be either a Game Character or a Game String. 
-        If the guess is a Game Character, the system shall check if the Game Character is already guessed or missed. If the Game Character is already guessed or missed, the system shall give an informative message to the user and not deduct any lives for this move. If the Game Character is not yet guessed or missed, the system shall process the Game Character as a move. <!-- TODO: Add handling of Game String as input and invalid input -->
+        - The system shall display the current State. On display, the system shall display the correctly guessed character; the current guess, if any; the misses; and a diagram of the current hangman.
+        Every life must have a unique diagram.
         - The system shall determine if the current game is finished and act accordingly.
-        A game is finished if the remainig lives in the current State reach 0, or if the to be guessed word is guessed. <!-- TODO: Clearly define what guessed means. -->
-        If the remainig lives reach 0, the system shall produce an informative message indicating
-        that the Player lost, and exit the game loop.
-        If the to be guessed word is guessed, the system shall produce an informative message indicating that the Player has won, and exit the game loop.
-        If the game is not finished, the system shall repeat the game loop.
-    
+        A game is finished if the remainig lives in the current State reach 0, or if the to be guessed word is guessed.
+        The word is guessed if the all Game Characters are guessed of if the user guesses the Game String correctly.
+        If the remainig lives reached 0, the system shall stop the game loop.
+        If the Player guessed the Game String correctly, the system shall stop the game loop.
+        If the game is not finished, the system shall continue to the prompt action.
+        - The system shall prompt the Player for their next guess.
+        A valid guess can be either a Game Character or a Game String.
+        If the guess is not a valid Game Character or Game String, the system shall inform the Player, not deduct any lives for this move, and move on to the display operation.
+        If the guess is a duplicate, the system shall inform the Player, not deduct any lives for this move, and move on to the display operation.
+        If the guess is not a duplicate, the system shall process the guess as a move.
 
-<!-- TODO: Define the move 'function'. -->
+- On a move, the system shall check if the move is a Game Character or a Game String
+    - If the move is a Game String, the system shall determine if the guess matches the to be guessed Game String.
+    If the guess is correct, the system shall make the to be guessed Game String fully public and continue with the display operation.
+    If the guess is incorrect, the system shall deduct a live, add the guess to the misses list, and continue to the display operation.
+    - If the move is a Game Character, the system shall determine if the to be guessed Game String contains the Game Character.
+    If the Game String contains the Game Character, the system shall make all the occurances of the Game Character public, and continue to the display operation.
+    If the Game String does not contain the Game Character, the system shall add the Game Character to the misses list, and continue to the display operation.
 
-- The system shall only accept strings entered by the Player that consist of uppercase or lowercase characters in the English alphabet, excluding any special characters.
 
-- The system shall inform the Player if an invalid input was entered by writing an error message to the screen, without changing the current State.
-
-- The system shall **inform** the Player whether it guessed the word after a Game instance has ended.
+- After stopping the game loop, the system shall inform the user accordingly.
+    - If the game finished and the Player won, the system shall **inform** the Player that it guessed the Game String.
+    - If the game finised and the Player lost, the systam shall **inform** the Player that it did not guess the Game String and inform the Player what the Game String is.
 
 - The system shall ask the Player after a Game instance has ended to start a new Game instance, or to gracefully terminate the program.
 
