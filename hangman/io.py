@@ -3,7 +3,7 @@ from enum import Enum, unique
 from functools import wraps
 from typing import Callable, List
 
-from hangman.constants import MAX_LENGTH, MAX_LIVES, MIN_LENGTH, ANIMATIONS
+from hangman.constants import ANIMATIONS, MAX_LENGTH, MAX_LIVES, MIN_LENGTH
 from hangman.core import Configurations, Guess, State
 
 
@@ -114,6 +114,10 @@ def get_guess(game_state: State) -> Guess:
     user_input = input("Please enter your guess: ")
 
     if len(user_input) == 1:
+        if not (65 <= ord(user_input) <= 90 or 97 <= ord(user_input) <= 122):
+            error_msg = "the character must be a valid ASCII (65-90 or 97-122)"
+            print_error(error_msg)
+            raise ValueError(error_msg)
         return Guess(guess=user_input)
 
     if len(user_input) == len(game_state.target_word):
@@ -122,7 +126,6 @@ def get_guess(game_state: State) -> Guess:
     error_msg = "the word to be guessed has a different length"
     print_error(error_msg)
     raise ValueError(error_msg)
-
 
 
 def display(state: State):

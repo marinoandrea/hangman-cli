@@ -4,14 +4,15 @@ This will test whether the basic messages are correctly formatted
 and whether the Player can input data correctly.
 '''
 from contextlib import contextmanager
+from functools import partial
 from io import StringIO
-from typing import List
+from typing import Any, Callable, List
 
 import pytest as pt
-from hangman.core import Configurations, State, Guess
 from hangman.constants import ANIMATIONS, MAX_LIVES
-from hangman.io import (get_guess, get_play_new_game, parse_args, print_error,
-                        print_info, display)
+from hangman.core import Configurations, Guess, State
+from hangman.io import (display, get_guess, get_play_new_game, parse_args,
+                        print_error, print_info)
 
 
 def _check_error(capsys: pt.CaptureFixture, expected: str):
@@ -28,9 +29,29 @@ def _check_info(capsys: pt.CaptureFixture, info: str):
 def check_value_error(capsys: pt.CaptureFixture, err: str):
     try:
         yield
+        # expecting ValueError
+        assert False
     except Exception as e:
         assert isinstance(e, ValueError)
         _check_error(capsys, err)
+
+
+def check_prompt(
+    capsys: pt.CaptureFixture,
+    monkeypatch: pt.MonkeyPatch,
+    prompt_fun: Callable[[], Any],
+    prompt_msg: str,
+    expected_err: str,
+    wrong_value: str,
+    legal_value: str,
+) -> Any:
+    monkeypatch.setattr('sys.stdin', StringIO(f"{wrong_value}\n{legal_value}"))
+    res = prompt_fun()
+    captured = capsys.readouterr()
+    assert captured.out == (
+        f"{prompt_msg}\033[31merror: {expected_err}\033[0m\n{prompt_msg}"
+    )
+    return res
 
 
 def test_print_error(capsys: pt.CaptureFixture):
@@ -142,7 +163,8 @@ def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
     a guess that could potentially be valid.
     """
     # assuming the initial dummy target word is "penguin"
-    state = State(target_word="penguin", current_lives=1, guesses=[], current_guess=None, current_word=[])
+    state = State(target_word="penguin", current_lives=1,
+                  guesses=[], current_guess=None, current_word=[])
 
     # single character guess
     monkeypatch.setattr('sys.stdin', StringIO("c"))
@@ -153,18 +175,28 @@ def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
     monkeypatch.setattr("sys.stdin", StringIO("opossum"))
     res = get_guess(state)
     assert "opossum" == res.guess
-
-    captured = capsys.readouterr()  # empty stdout
+    capsys.readouterr()  # empty stdout
 
     # while the word has a different length the user is reprompted to guess
-    monkeypatch.setattr("sys.stdin", StringIO('pengui\npenguix'))
-    res = get_guess(state)
+    check_prompt(
+        capsys,
+        monkeypatch,
+        partial(get_guess, state),
+        "Please enter your guess: ",
+        "the word to be guessed has a different length",
+        "pengui",
+        "penguix"
+    )
 
-    captured = capsys.readouterr()
-    expected = "the word to be guessed has a different length"
-    assert captured.out == (
-        f"Please enter your guess: \033[31merror: {expected}\033[0m\n"
-        + "Please enter your guess: "
+    # test for ASCII range
+    check_prompt(
+        capsys,
+        monkeypatch,
+        partial(get_guess, state),
+        "Please enter your guess: ",
+        "the character must be a valid ASCII (65-90 or 97-122)",
+        "┴",
+        "a"
     )
 
 
@@ -172,7 +204,8 @@ def test_initial_display(capsys: pt.CaptureFixture):
     """
     Tests the display function at the start of a game(when no guess is made.)
     """
-    state = State(target_word="penguin", current_lives=10, guesses=[], current_guess=None, current_word=["_", "_", "_"])
+    state = State(target_word="penguin", current_lives=10, guesses=[],
+                  current_guess=None, current_word=["_", "_", "_"])
     display(state)
     captured = capsys.readouterr()
     expected_output = ["Word: _ _ _", ANIMATIONS[0], ""]
@@ -183,7 +216,8 @@ def test_dead_display(capsys: pt.CaptureFixture):
     """
     Tests the display function at the end of a game(when no more guesses can be made.)
     """
-    state = State(target_word="penguin", current_lives=0, guesses=[], current_guess=Guess("X"), current_word=["_", "_", "_"])
+    state = State(target_word="penguin", current_lives=0, guesses=[],
+                  current_guess=Guess("X"), current_word=["_", "_", "_"])
     display(state)
     captured = capsys.readouterr()
     expected_output = ["Word: _ _ _", "Guess: X", ANIMATIONS[MAX_LIVES], ""]
@@ -197,14 +231,14 @@ def test_get_play_new_game(
     Basic IO test. This tests whether the get_play_new_game function returns
     a boolean answer based on a correct [y/n] input.
     """
-    monkeypatch.setattr('sys.stdin', StringIO("a\ny"))
-    res = get_play_new_game()
-
-    captured = capsys.readouterr()
-    assert captured.out == (
-        "Do you want to start a new game? [y/n] " +
-        "\033[31merror: you must answer yes (y) or no (n)\033[0m\n" +
-        "Do you want to start a new game? [y/n] "
+    res = check_prompt(
+        capsys,
+        monkeypatch,
+        get_play_new_game,
+        "Do you want to start a new game? [y/n] ",
+        "you must answer yes (y) or no (n)",
+        "a",
+        "y",
     )
     assert res
 
