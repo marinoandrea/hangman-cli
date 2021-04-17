@@ -35,7 +35,7 @@ class Configurations:
     word_list: Optional[WordList] = WordList(easy=["Bye"], medium=["Difficult"], hard=["Zyuganov"])
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class Guess:
     """
     The Guess contains a certain guess. This could be either one character
