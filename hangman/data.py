@@ -24,7 +24,7 @@ class Configurations:
     difficulty: Difficulty = Difficulty.MEDIUM
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class Guess:
     """
     The Guess contains a certain guess. This could be either one character

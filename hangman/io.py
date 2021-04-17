@@ -112,7 +112,10 @@ def prompt(f: Callable) -> Callable:
 
 @prompt
 def get_guess(game_state: State) -> Guess:
-    user_input = input("Please enter your guess: ")
+    user_input = input("Please enter your guess: ").lower()
+
+    if len(user_input) == 0:
+        raise ValueError("you must guess a character or the entire word")
 
     if len(user_input) == 1:
         if not (65 <= ord(user_input) <= 90 or 97 <= ord(user_input) <= 122):
@@ -134,15 +137,22 @@ def display(state: State):
         # our program should crash.
         raise RuntimeError("Lives is inconsistent with animations.")
 
-    # print current word based on the list of guesses
-    current_word: List[str] = []
-    for char in state.target_word:
-        try:
-            next(g for g in state.guesses if g.guess == char)
-            current_word.append(char)
-        except StopIteration:
-            current_word.append('_')
-    print("Word: {}".format(" ".join(current_word)))
+    if not state.is_running:
+        if state.is_victory:
+            print('\nCongratulations, you have guessed the word! 🥳\n')
+        else:
+            print('\nSorry, you have lost! 😢\n')
+        print(f"Word: {' '.join(c for c in state.target_word)}")
+    else:
+        # print current word based on the list of guesses
+        current_word: List[str] = []
+        for char in state.target_word:
+            try:
+                next(g for g in state.guesses if g.guess == char)
+                current_word.append(char)
+            except StopIteration:
+                current_word.append('_')
+        print("Word: {}".format(" ".join(current_word)))
 
     if state.current_guess is not None:
         print("Guess: {}".format(state.current_guess.guess))
@@ -152,7 +162,7 @@ def display(state: State):
 
 @prompt
 def get_play_new_game() -> bool:
-    user_input = input("Do you want to start a new game? [y/n] ")
+    user_input = input("Do you want to start a new game? [y/n] ").lower()
     if user_input not in ['y', 'n']:
         raise ValueError("you must answer yes (y) or no (n)")
     return user_input == 'y'
