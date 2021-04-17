@@ -4,7 +4,7 @@ from functools import wraps
 from typing import Callable, List
 
 from hangman.constants import ANIMATIONS, MAX_LENGTH, MAX_LIVES, MIN_LENGTH
-from hangman.core import Configurations, Guess, State
+from hangman.data import Configurations, Guess, State
 
 
 @unique
@@ -104,7 +104,8 @@ def prompt(f: Callable) -> Callable:
         while True:
             try:
                 return f(*args, **kwargs)
-            except ValueError:
+            except ValueError as e:
+                print_error(getattr(e, 'message', str(e)))
                 continue
     return inner
 
@@ -115,17 +116,13 @@ def get_guess(game_state: State) -> Guess:
 
     if len(user_input) == 1:
         if not (65 <= ord(user_input) <= 90 or 97 <= ord(user_input) <= 122):
-            error_msg = "the character must be a valid ASCII (65-90 or 97-122)"
-            print_error(error_msg)
-            raise ValueError(error_msg)
+            raise ValueError("the character must be a valid ASCII (65-90 or 97-122)")
         return Guess(guess=user_input)
 
     if len(user_input) == len(game_state.target_word):
         return Guess(guess=user_input, whole_word=True)
 
-    error_msg = "the word to be guessed has a different length"
-    print_error(error_msg)
-    raise ValueError(error_msg)
+    raise ValueError("the word to be guessed has a different length")
 
 
 def display(state: State):
@@ -153,11 +150,9 @@ def display(state: State):
     print(ANIMATIONS[curr_animation])
 
 
-@ prompt
+@prompt
 def get_play_new_game() -> bool:
     user_input = input("Do you want to start a new game? [y/n] ")
     if user_input not in ['y', 'n']:
-        error_msg = 'you must answer yes (y) or no (n)'
-        print_error(error_msg)
-        raise ValueError(error_msg)
+        raise ValueError("you must answer yes (y) or no (n)")
     return user_input == 'y'
