@@ -164,17 +164,17 @@ def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
     """
     # assuming the initial dummy target word is "penguin"
     state = State(target_word="penguin", current_lives=1,
-                  guesses=[], current_guess=None, current_word=[])
+                  guesses=[], current_guess=None)
 
     # single character guess
     monkeypatch.setattr('sys.stdin', StringIO("c"))
-    res = get_guess(state)
-    assert "c" == res.guess
+    res: Guess = get_guess(state)
+    assert "c" == res.guess and not res.whole_word
 
     # word of the same length guess
     monkeypatch.setattr("sys.stdin", StringIO("opossum"))
     res = get_guess(state)
-    assert "opossum" == res.guess
+    assert "opossum" == res.guess and res.whole_word
     capsys.readouterr()  # empty stdout
 
     # while the word has a different length the user is reprompted to guess
@@ -202,25 +202,27 @@ def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
 
 def test_initial_display(capsys: pt.CaptureFixture):
     """
-    Tests the display function at the start of a game(when no guess is made.)
+    Tests the display function at the start of a game
+    (when no guess is made.)
     """
     state = State(target_word="penguin", current_lives=10, guesses=[],
-                  current_guess=None, current_word=["_", "_", "_"])
+                  current_guess=None)
     display(state)
     captured = capsys.readouterr()
-    expected_output = ["Word: _ _ _", ANIMATIONS[0], ""]
+    expected_output = ["Word: _ _ _ _ _ _ _", ANIMATIONS[0], ""]
     assert captured.out == "\n".join(expected_output)
 
 
 def test_dead_display(capsys: pt.CaptureFixture):
     """
-    Tests the display function at the end of a game(when no more guesses can be made.)
+    Tests the display function at the end of a game
+    (when no more guesses can be made.)
     """
     state = State(target_word="penguin", current_lives=0, guesses=[],
-                  current_guess=Guess("X"), current_word=["_", "_", "_"])
+                  current_guess=Guess("X"))
     display(state)
     captured = capsys.readouterr()
-    expected_output = ["Word: _ _ _", "Guess: X", ANIMATIONS[MAX_LIVES], ""]
+    expected_output = ["Word: _ _ _ _ _ _ _", "Guess: X", ANIMATIONS[MAX_LIVES], ""]
     assert captured.out == "\n".join(expected_output)
 
 

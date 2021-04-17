@@ -31,6 +31,7 @@ class Guess:
     or a guessed string.
     """
     guess: str
+    whole_word: bool = False
 
 
 @dataclass
@@ -41,19 +42,10 @@ class State:
     the number of Lives and the configuration options.
     """
     target_word: str
-    current_word: List[str]
     current_lives: int
     current_guess: Optional[Guess] = None
     guesses: List[Guess] = field(default_factory=lambda: [])
     is_running: bool = True
-
-    @staticmethod
-    def new(word: str, lives: int) -> 'State':
-        return State(
-            target_word=word,
-            current_word=['_' for _ in word],
-            current_lives=lives
-        )
 
     @staticmethod
     def from_config(config: Configurations) -> 'State':
@@ -62,7 +54,7 @@ class State:
             config.max_length,
             config.difficulty
         )
-        return State.new(target_word, config.lives)
+        return State(target_word=target_word, current_lives=config.lives)
 
 
 def update_game(game_state: State):

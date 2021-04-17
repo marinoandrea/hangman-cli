@@ -121,7 +121,7 @@ def get_guess(game_state: State) -> Guess:
         return Guess(guess=user_input)
 
     if len(user_input) == len(game_state.target_word):
-        return Guess(guess=user_input)
+        return Guess(guess=user_input, whole_word=True)
 
     error_msg = "the word to be guessed has a different length"
     print_error(error_msg)
@@ -131,15 +131,29 @@ def get_guess(game_state: State) -> Guess:
 def display(state: State):
     curr_animation = MAX_LIVES - state.current_lives
     if curr_animation >= len(ANIMATIONS):
-        raise ValueError("Lives is inconsistent with animations.")
+        # NOTE(andrea): we should use ValueError only as
+        # an indicator of failure in input parsing.
+        # In this case, if we reach such a state (and we shouldn't)
+        # our program should crash.
+        raise RuntimeError("Lives is inconsistent with animations.")
 
-    print("Word: {}".format(" ".join(state.current_word)))
+    # print current word based on the list of guesses
+    current_word: List[str] = []
+    for char in state.target_word:
+        try:
+            next(g for g in state.guesses if g.guess == char)
+            current_word.append(char)
+        except StopIteration:
+            current_word.append('_')
+    print("Word: {}".format(" ".join(current_word)))
+
     if state.current_guess is not None:
         print("Guess: {}".format(state.current_guess.guess))
+
     print(ANIMATIONS[curr_animation])
 
 
-@prompt
+@ prompt
 def get_play_new_game() -> bool:
     user_input = input("Do you want to start a new game? [y/n] ")
     if user_input not in ['y', 'n']:
