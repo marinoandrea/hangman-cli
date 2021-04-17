@@ -48,11 +48,11 @@ class State:
     is_running: bool = True
 
     @staticmethod
-    def new(word: str, lives: int):
+    def new(word: str, lives: int) -> 'State':
         return State(
-            target_word = word,
-            current_word = ['_' for _ in word],
-            current_lives = lives
+            target_word=word,
+            current_word=['_' for _ in word],
+            current_lives=lives
         )
 
     @staticmethod
@@ -62,7 +62,7 @@ class State:
             config.max_length,
             config.difficulty
         )
-        return State.new(target_word, current_lives)
+        return State.new(target_word, config.lives)
 
 
 def update_game(game_state: State):
