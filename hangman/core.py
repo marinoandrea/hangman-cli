@@ -38,13 +38,13 @@ def update_game(game_state: State, guess: Guess):
     game_state.guesses.append(guess)
 
     def win():
-        game_state.is_over = True
+        game_state.is_running = False
         game_state.is_victory = True
 
     def take_life():
         game_state.current_lives -= 1
         if game_state.current_lives == 0:
-            game_state.is_over = True
+            game_state.is_running = False
             game_state.is_victory = False
 
     if guess.whole_word:

@@ -46,5 +46,4 @@ class State:
     current_guess: Optional[Guess] = None
     guesses: List[Guess] = field(default_factory=lambda: [])
     is_running: bool = True
-    is_over: bool = False
     is_victory: bool = False
