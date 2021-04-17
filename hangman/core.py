@@ -1,18 +1,24 @@
-from hangman.data import Configurations, Difficulty, Guess, State
+from hangman.data import Configurations, Difficulty, Guess, State, WordList
 from hangman.io import display, print_info
-
+import random
 
 def pick_word(
-    min_length: int, max_length: int, max_difficulty: Difficulty
+    min_length: int, max_length: int, max_difficulty: Difficulty, word_list: WordList
 ) -> str:
-    raise NotImplementedError()
+    target_list = word_list.easy if max_difficulty == Difficulty.EASY else word_list.medium if max_difficulty == Difficulty.MEDIUM else word_list.hard
+    filtered_target_list = list(filter(lambda w: len(w) >= min_length and len(w) <= max_length, target_list))
+    if len(filtered_target_list) <= 0:
+        raise ValueError("No word found for given configuration.")
+    return filtered_target_list[random.randint(0, len(filtered_target_list) - 1)]
+
 
 
 def init_state(config: Configurations) -> State:
     target_word = pick_word(
         config.min_length,
         config.max_length,
-        config.difficulty
+        config.difficulty,
+        config.word_list
     )
     return State(target_word=target_word, current_lives=config.lives)
 
@@ -58,5 +64,3 @@ def update_game(game_state: State, guess: Guess):
                 win()
         else:
             take_life()
-
-    display(game_state)

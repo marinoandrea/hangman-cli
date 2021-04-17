@@ -12,6 +12,16 @@ class Difficulty(Enum):
     HARD = 'hard'
 
 
+@dataclass
+class WordList:
+    """
+    Describes a list of words divided into three categories: easy, medium, and hard.
+    """
+    easy: List[str]
+    medium: List[str]
+    hard: List[str]
+
+
 @dataclass(frozen=True)
 class Configurations:
     """
@@ -22,6 +32,7 @@ class Configurations:
     min_length: int = MIN_LENGTH
     max_length: int = MAX_LENGTH
     difficulty: Difficulty = Difficulty.MEDIUM
+    word_list: Optional[WordList] = WordList(easy=["Bye"], medium=["Difficult"], hard=["Zyuganov"])
 
 
 @dataclass
