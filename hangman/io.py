@@ -4,7 +4,7 @@ from functools import wraps
 from typing import Callable, List
 
 from hangman.constants import ANIMATIONS, MAX_LENGTH, MAX_LIVES, MIN_LENGTH
-from hangman.data import Configurations, Guess, State
+from hangman.data import Configurations, Guess, State, Difficulty
 from hangman.wordlists import BRITISH
 
 
@@ -46,6 +46,11 @@ def parse_args(argList: List[str]) -> Configurations:
         type=int,
         default=MAX_LIVES,
         help="specifies the number of lives you will have throughout the game")
+    parser.add_argument(
+        "-d", "--difficulty",
+        default="medium",
+        help="specified the difficulty level of the word. Can be: 'easy', 'medium', or 'hard'"
+    )
 
     # as each argument takes exactly one value,
     # the argList must be of even length.
@@ -65,6 +70,9 @@ def parse_args(argList: List[str]) -> Configurations:
         args.maximum_length = -1
     if ("-l" in argList or "--lives" in argList) and not args.lives:
         args.lives = -1
+    if ("-d" in argList or "--difficulty" in argList) and not args.difficulty:
+        args.difficulty = ""
+
 
     # sanity checks
     if args.minimum_length is not None:
@@ -87,12 +95,22 @@ def parse_args(argList: List[str]) -> Configurations:
             print_error(error_msg)
             raise ValueError(error_msg)
 
+    if args.difficulty is not None:
+        if args.difficulty not in ['easy', 'medium', 'hard']:
+            error_msg = "Difficulty level is not valid"
+            print_error(error_msg)
+            raise ValueError(error_msg)
+
+    difficulty_level = Difficulty.EASY if args.difficulty == 'easy' else Difficulty.MEDIUM if args.difficulty == "medium" else Difficulty.HARD
+
+
     # ceate config object
     return Configurations(
         lives=args.lives,
         min_length=args.minimum_length,
         max_length=args.maximum_length,
-        word_list = BRITISH
+        word_list = BRITISH,
+        difficulty = difficulty_level
     )
 
 

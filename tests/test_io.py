@@ -10,7 +10,7 @@ from typing import Any, Callable, List
 
 import pytest as pt
 from hangman.constants import ANIMATIONS, MAX_LIVES
-from hangman.core import Configurations, Guess, State
+from hangman.core import Configurations, Guess, State, Difficulty
 from hangman.io import (display, get_guess, get_play_new_game, parse_args,
                         print_error, print_info)
 
@@ -155,6 +155,41 @@ def test_parse_args_lives(capsys: pt.CaptureFixture):
         assert res.lives == i
     res = parse_args(["--lives", "5"])
     assert res.lives == 5
+
+
+def test_parse_args_difficulty_easy(capsys: pt.CaptureFixture):
+    """
+    Tests for the lives argument in the parser.
+    """
+    res: Configurations
+    res = parse_args(["-d", "easy"])
+    assert res.difficulty == Difficulty.EASY
+
+
+def test_parse_args_difficulty_medium(capsys: pt.CaptureFixture):
+    """
+    Tests for the lives argument in the parser.
+    """
+    res: Configurations
+    res = parse_args(["-d", "medium"])
+    assert res.difficulty == Difficulty.MEDIUM
+
+
+def test_parse_args_difficulty_hard(capsys: pt.CaptureFixture):
+    """
+    Tests for the lives argument in the parser.
+    """
+    res: Configurations
+    res = parse_args(["-d", "hard"])
+    assert res.difficulty == Difficulty.HARD
+
+
+def test_parse_args_difficulty_invalid():
+    with pt.raises(ValueError):
+        parse_args(["-d", "not_valid"])
+
+    with pt.raises(ValueError):
+        parse_args(["-d"])
 
 
 def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
