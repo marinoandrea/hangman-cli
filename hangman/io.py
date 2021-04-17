@@ -5,6 +5,7 @@ from typing import Callable, List
 
 from hangman.constants import ANIMATIONS, MAX_LENGTH, MAX_LIVES, MIN_LENGTH
 from hangman.data import Configurations, Guess, State
+from hangman.wordlists import BRITISH
 
 
 @unique
@@ -90,7 +91,8 @@ def parse_args(argList: List[str]) -> Configurations:
     return Configurations(
         lives=args.lives,
         min_length=args.minimum_length,
-        max_length=args.maximum_length
+        max_length=args.maximum_length,
+        word_list = BRITISH
     )
 
 
