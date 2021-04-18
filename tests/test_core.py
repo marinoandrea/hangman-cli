@@ -1,4 +1,5 @@
-from hangman.core import Guess, State, update_game
+from hangman.core import update_game
+from hangman.data import Guess, State
 
 
 def test_update_game():
