@@ -4,7 +4,8 @@ from functools import wraps
 from typing import Callable, List
 
 from hangman.constants import ANIMATIONS, MAX_LENGTH, MAX_LIVES, MIN_LENGTH
-from hangman.data import Configurations, Difficulty, Guess, State
+from hangman.data import Configurations, Difficulty, Guess, State, WordList
+from hangman.wordlists import BRITISH
 
 
 @unique
@@ -25,6 +26,19 @@ def print_error(string: str):
 
 def print_info(string: str):
     print(f"{colors.BLUE}info: {string}{colors.END}")
+
+
+def validate_configuration(
+    config: Configurations,
+    wordlist: WordList = BRITISH
+):
+
+    target_list: List[str] = getattr(wordlist, config.difficulty.value, [])
+
+    if max(len(w) for w in target_list) < config.min_length:
+        msg = f"The are no words as long as {config.min_length} in the game."
+        print_error(msg)
+        raise ValueError(msg)
 
 
 def parse_args(argList: List[str]) -> Configurations:
@@ -74,12 +88,18 @@ def parse_args(argList: List[str]) -> Configurations:
 
     # sanity checks
     if args.minimum_length is not None:
-        if args.maximum_length and args.minimum_length > args.maximum_length:
+        if args.maximum_length is not None and args.minimum_length > args.maximum_length:
             error_msg = "minimum length value higher than maximum length value"
             print_error(error_msg)
             raise ValueError(error_msg)
         if args.minimum_length < 2:
             error_msg = "minimum length value too low"
+            print_error(error_msg)
+            raise ValueError(error_msg)
+
+    if args.maximum_length is not None:
+        if args.maximum_length <= 2:
+            error_msg = "maximum length value too low"
             print_error(error_msg)
             raise ValueError(error_msg)
 
@@ -102,12 +122,16 @@ def parse_args(argList: List[str]) -> Configurations:
     difficulty_level = Difficulty[args.difficulty.upper()]
 
     # ceate config object
-    return Configurations(
+    out = Configurations(
         lives=args.lives,
         min_length=args.minimum_length,
         max_length=args.maximum_length,
         difficulty=difficulty_level
     )
+
+    validate_configuration(out)
+
+    return out
 
 
 def prompt(f: Callable) -> Callable:

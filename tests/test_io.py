@@ -131,6 +131,10 @@ def test_parse_args_length(capsys: pt.CaptureFixture):
         argList = ["-m", l_tests[3][MIN], "-M", l_tests[2][MAX]]
         parse_args(argList)
 
+    with check_value_error(capsys, "The are no words as long as 999 in the game."):
+        argList = ["-m", "999", "-M", "1000"]
+        parse_args(argList)
+
 
 def test_parse_args_lives(capsys: pt.CaptureFixture):
     """

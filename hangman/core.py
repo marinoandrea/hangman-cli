@@ -18,8 +18,8 @@ def pick_word(
     # pass the list as an argument. We can just use BRITISH as a default.
     target_list: List[str] = getattr(wordlist, difficulty.value, [])
 
-    filtered_target_list = list(filter(lambda w: len(
-        w) >= min_length and len(w) <= max_length, target_list))
+    filtered_target_list = list(filter(
+        lambda w: min_length <= len(w) <= max_length, target_list))
 
     if len(filtered_target_list) <= 0:
         print_error("No word found for given configuration.")

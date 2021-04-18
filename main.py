@@ -1,13 +1,17 @@
 import sys
 
 from hangman.core import init_state, update_game
-from hangman.io import display, get_guess, get_play_new_game, parse_args
+from hangman.io import (display, get_guess, get_play_new_game, parse_args,
+                        print_info, validate_configuration)
 
 
 def main():
-    config = parse_args(sys.argv[1:])
-
-    is_prog_running = True
+    try:
+        config = parse_args(sys.argv[1:])
+        is_prog_running = True
+    except ValueError:
+        print_info('Please try to start the game with different arguments.')
+        is_prog_running = False
 
     while is_prog_running:
         state = init_state(config)
