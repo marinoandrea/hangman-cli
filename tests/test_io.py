@@ -121,11 +121,6 @@ def test_parse_args_length(capsys: pt.CaptureFixture):
         argList = ["-m", l_tests[2][MIN], "-M", l_tests[2][MAX]]
         parse_args(argList)
 
-    # missing value
-    with check_value_error(capsys, "missing_value"):
-        argList = ["-m"]
-        parse_args(argList)
-
     # too low values
     with check_value_error(capsys, "minimum length value too low"):
         argList = ["-m", l_tests[3][MIN], "-M", l_tests[2][MAX]]
@@ -191,9 +186,6 @@ def test_parse_args_difficulty_hard(capsys: pt.CaptureFixture):
 def test_parse_args_difficulty_invalid():
     with pt.raises(ValueError):
         parse_args(["-d", "not_valid"])
-
-    with pt.raises(ValueError):
-        parse_args(["-d"])
 
 
 def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
