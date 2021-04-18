@@ -76,13 +76,6 @@ def parse_args(argList: List[str]) -> Configurations:
         help="specified the difficulty level of the word. Can be: 'easy', 'medium', or 'hard'"
     )
 
-    # as each argument takes exactly one value,
-    # the argList must be of even length.
-    if len(argList) % 2 != 0:
-        error_msg = "missing_value"
-        print_error(error_msg)
-        raise ValueError(error_msg)
-
     # parsing the arguments
     args = parser.parse_args(argList)
 
