@@ -2,7 +2,7 @@ import sys
 
 from hangman.core import init_state, update_game
 from hangman.io import (display, get_guess, get_play_new_game, parse_args,
-                        print_info, validate_configuration)
+                        print_info)
 
 
 def main():

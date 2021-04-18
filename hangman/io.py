@@ -1,3 +1,4 @@
+import json
 from argparse import ArgumentParser
 from enum import Enum, unique
 from functools import wraps
@@ -5,7 +6,7 @@ from typing import Callable, List
 
 from hangman.constants import ANIMATIONS, MAX_LENGTH, MAX_LIVES, MIN_LENGTH
 from hangman.data import Configurations, Difficulty, Guess, State, WordList
-from hangman.wordlists import BRITISH
+from hangman.utils import cached
 
 
 @unique
@@ -28,9 +29,19 @@ def print_info(string: str):
     print(f"{colors.BLUE}info: {string}{colors.END}")
 
 
+@cached
+def load_wordlist(
+    path: str = './assets/wordlists.json',
+    lang: str = 'BRITISH'
+) -> WordList:
+    with open(path, 'r') as f:
+        data = json.load(f)[lang]
+    return WordList(**data)
+
+
 def validate_configuration(
     config: Configurations,
-    wordlist: WordList = BRITISH
+    wordlist: WordList = load_wordlist()
 ):
 
     target_list: List[str] = getattr(wordlist, config.difficulty.value, [])

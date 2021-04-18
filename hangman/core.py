@@ -2,15 +2,14 @@ import random
 from typing import List
 
 from hangman.data import Configurations, Difficulty, Guess, State, WordList
-from hangman.io import print_error, print_info
-from hangman.wordlists import BRITISH
+from hangman.io import load_wordlist, print_error, print_info
 
 
 def pick_word(
     min_length: int,
     max_length: int,
     difficulty: Difficulty,
-    wordlist: WordList = BRITISH
+    wordlist: WordList = load_wordlist()
 ) -> str:
     # NOTE(andrea): this should never fail, so no default should be needed.
     # pick_word should choose a wordlist based on difficulty (and maybe
