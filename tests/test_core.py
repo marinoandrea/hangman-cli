@@ -1,5 +1,6 @@
-from hangman.core import update_game
-from hangman.data import Guess, State
+import pytest
+from hangman.core import pick_word, update_game
+from hangman.data import Difficulty, Guess, State, WordList
 
 
 def test_update_game():
@@ -75,3 +76,25 @@ def test_update_game():
     assert state.current_lives == 0
     assert not state.is_running
     assert not state.is_victory
+
+
+def test_pick_word():
+    easy_word = pick_word(1, 100, Difficulty.EASY, WordList(
+        easy=["hello"], medium=["world"], hard=["hard"]))
+    assert easy_word == "hello"
+
+    medium_word = pick_word(1, 100, Difficulty.MEDIUM, WordList(
+        easy=["hello"], medium=["world"], hard=["hard"]))
+    assert medium_word == "world"
+
+    hard_word = pick_word(1, 100, Difficulty.HARD, WordList(
+        easy=["hello"], medium=["world"], hard=["hard"]))
+    assert hard_word == "hard"
+
+
+def test_pick_word_bad_config():
+    with pytest.raises(ValueError):
+        pick_word(1, 2, Difficulty.EASY, WordList(easy=["hello"], medium=["world"], hard=["hard"]))
+
+    with pytest.raises(ValueError):
+        pick_word(1, 2, Difficulty.EASY, WordList(easy=[], medium=["world"], hard=["hard"]))

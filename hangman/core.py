@@ -1,18 +1,38 @@
-from hangman.data import Configurations, Difficulty, Guess, State
-from hangman.io import display, print_info
+import random
+from typing import List
+
+from hangman.data import Configurations, Difficulty, Guess, State, WordList
+from hangman.io import print_error, print_info
+from hangman.wordlists import BRITISH
 
 
 def pick_word(
-    min_length: int, max_length: int, max_difficulty: Difficulty
+    min_length: int,
+    max_length: int,
+    difficulty: Difficulty,
+    wordlist: WordList = BRITISH
 ) -> str:
-    raise NotImplementedError()
+    # NOTE(andrea): this should never fail, so no default should be needed.
+    # pick_word should choose a wordlist based on difficulty (and maybe
+    # a language configuration?). So, besides from testing, there is no need to
+    # pass the list as an argument. We can just use BRITISH as a default.
+    target_list: List[str] = getattr(wordlist, difficulty.value, [])
+
+    filtered_target_list = list(filter(lambda w: len(
+        w) >= min_length and len(w) <= max_length, target_list))
+
+    if len(filtered_target_list) <= 0:
+        print_error("No word found for given configuration.")
+        raise ValueError("No word found for given configuration.")
+
+    return random.choice(filtered_target_list)
 
 
 def init_state(config: Configurations) -> State:
     target_word = pick_word(
         config.min_length,
         config.max_length,
-        config.difficulty
+        config.difficulty,
     )
     return State(target_word=target_word, current_lives=config.lives)
 
@@ -58,5 +78,3 @@ def update_game(game_state: State, guess: Guess):
                 win()
         else:
             take_life()
-
-    display(game_state)

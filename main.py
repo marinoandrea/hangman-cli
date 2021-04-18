@@ -1,7 +1,7 @@
 import sys
 
 from hangman.core import init_state, update_game
-from hangman.io import get_guess, get_play_new_game, parse_args
+from hangman.io import display, get_guess, get_play_new_game, parse_args
 
 
 def main():
@@ -11,20 +11,22 @@ def main():
 
     while is_prog_running:
         state = init_state(config)
+        display(state)
 
         try:
             while state.is_running:
                 try:
                     guess = get_guess(state)
                     update_game(state, guess)
-                except KeyboardInterrupt:
+                    display(state)
+                except (KeyboardInterrupt, EOFError):
                     state.is_running = False
                     # NOTE(andrea): this is just for aesthetic purposes
                     print('\n')
 
             is_prog_running = get_play_new_game()
 
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, EOFError):
             is_prog_running = False
             # NOTE(andrea): this is just for aesthetic purposes
             print('\n')
