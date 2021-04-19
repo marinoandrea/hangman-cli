@@ -6,7 +6,7 @@ from typing import Callable, List
 
 from hangman.constants import ANIMATIONS, MAX_LENGTH, MAX_LIVES, MIN_LENGTH
 from hangman.data import Configurations, Difficulty, Guess, State, WordList
-from hangman.utils import cached
+from hangman.utils import cached, get_resource_path
 
 
 @unique
@@ -34,7 +34,7 @@ def load_wordlist(
     path: str = './assets/wordlists.json',
     lang: str = 'BRITISH'
 ) -> WordList:
-    with open(path, 'r') as f:
+    with open(get_resource_path(path), 'r') as f:
         data = json.load(f)[lang]
     return WordList(**data)
 
