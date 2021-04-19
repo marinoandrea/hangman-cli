@@ -73,14 +73,20 @@ def parse_args(argList: List[str]) -> Configurations:
     parser.add_argument(
         "-d", "--difficulty",
         default="medium",
-        help="specified the difficulty level of the word. Can be: 'easy', 'medium', or 'hard'"
+        help=(
+            "specified the difficulty level of the word. " +
+            "Can be: 'easy', 'medium', or 'hard'"
+        )
     )
 
     args = parser.parse_args(argList)
 
     # sanity checks
     if args.minimum_length is not None:
-        if args.maximum_length is not None and args.minimum_length > args.maximum_length:
+        if (
+            args.maximum_length is not None and
+            args.minimum_length > args.maximum_length
+        ):
             error_msg = "minimum length value higher than maximum length value"
             print_error(error_msg)
             raise ValueError(error_msg)

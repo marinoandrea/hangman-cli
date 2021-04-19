@@ -109,15 +109,17 @@ def test_parse_args_length(capsys: pt.CaptureFixture):
     assert res.min_length == int(l_tests[1][MIN])
     assert res.max_length == int(l_tests[1][MAX])
 
-    argList = ["--maximum-length", l_tests[1][MAX], "--minimum-length", l_tests[1][MIN]]
+    argList = [
+        "--maximum-length", l_tests[1][MAX],
+        "--minimum-length", l_tests[1][MIN]
+    ]
     res = parse_args(argList)
     assert res.min_length == int(l_tests[1][MIN])
     assert res.max_length == int(l_tests[1][MAX])
 
-    ### error tests ###
-
     # min higher than max
-    with check_value_error(capsys, "minimum length value higher than maximum length value"):
+    with check_value_error(
+            capsys, "minimum length value higher than maximum length value"):
         argList = ["-m", l_tests[2][MIN], "-M", l_tests[2][MAX]]
         parse_args(argList)
 
@@ -131,7 +133,8 @@ def test_parse_args_length(capsys: pt.CaptureFixture):
         parse_args(argList)
 
     # value higher than longest word
-    with check_value_error(capsys, "The are no words as long as 999 in the game."):
+    with check_value_error(
+            capsys, "The are no words as long as 999 in the game."):
         argList = ["-m", "999", "-M", "1000"]
         parse_args(argList)
 

@@ -1,5 +1,3 @@
-from dataclasses import fields
-
 import pytest
 from hangman.core import is_word_found, pick_word, update_game
 from hangman.data import Difficulty, Guess, State, WordList
@@ -129,10 +127,12 @@ def test_pick_word():
 
 def test_pick_word_bad_config():
     with pytest.raises(ValueError):
-        pick_word(1, 2, Difficulty.EASY, WordList(easy=["hello"], medium=["world"], hard=["hard"]))
+        pick_word(1, 2, Difficulty.EASY, WordList(
+            easy=["hello"], medium=["world"], hard=["hard"]))
 
     with pytest.raises(ValueError):
-        pick_word(1, 2, Difficulty.EASY, WordList(easy=[], medium=["world"], hard=["hard"]))
+        pick_word(1, 2, Difficulty.EASY, WordList(
+            easy=[], medium=["world"], hard=["hard"]))
 
 
 def test_is_word_found():
