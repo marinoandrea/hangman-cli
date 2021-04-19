@@ -343,11 +343,11 @@ between the different type of messages.
 
 #### Functional
 
-- FREQ-10.1: The system shall print error messages to the Player in <span style="color:#BF616A">red</span>.
+- FREQ-10.1: The system shall print error messages to the Player with red as the foreground color via escape code '31' in the terminal.
 
-- FREQ-10.2: The system shall print informational messages to the Player in <span style="color:#5E81AC">blue</span>.
+- FREQ-10.2: The system shall print informational messages to the Player with light cyan as the foreground color via escape code '96' in the terminal.
 
-- FREQ-10.3: The system shall print regular messages to the Player in the default color of the terminal.
+- FREQ-10.3: The system shall print regular messages to the Player without any color modifications from our side.
 
 ## _Other Nonfunctional Requirements_
 
