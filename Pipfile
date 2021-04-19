@@ -10,6 +10,7 @@ coverage = "*"
 pytest = "*"
 pyinstaller = "*"
 pytest-cov = "*"
+pywin32-ctypes = "*"
 
 [packages]
 
