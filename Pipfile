@@ -9,6 +9,7 @@ autopep8 = "*"
 coverage = "*"
 pytest = "*"
 pyinstaller = "*"
+pytest-cov = "*"
 
 [packages]
 
@@ -17,6 +18,7 @@ python_version = "3.9"
 
 [scripts]
 test = "coverage run -m pytest"
+test-dev = "pytest --cov=. -v"
 start = "python main.py"
 build-linux = "pyinstaller --onefile main.py --add-data \"assets/wordlists.json:assets\""
 build-windows = "pyinstaller --onefile main.py --add-data \"assets/wordlists.json;assets\""
