@@ -36,7 +36,7 @@ def init_state(config: Configurations) -> State:
     return State(target_word=target_word, current_lives=config.lives)
 
 
-def _is_word_found(game_state: State) -> bool:
+def is_word_found(game_state: State) -> bool:
     for c in game_state.target_word:
         try:
             next(g for g in game_state.guesses if g.guess == c)
@@ -73,7 +73,7 @@ def update_game(game_state: State, guess: Guess):
             take_life()
     else:
         if game_state.target_word.find(guess.guess) != -1:
-            if _is_word_found(game_state):
+            if is_word_found(game_state):
                 win()
         else:
             take_life()

@@ -76,19 +76,7 @@ def parse_args(argList: List[str]) -> Configurations:
         help="specified the difficulty level of the word. Can be: 'easy', 'medium', or 'hard'"
     )
 
-    # parsing the arguments
     args = parser.parse_args(argList)
-
-    # if -m was specified, but the value of args.minimum_length is None,
-    # the value 0 was used.
-    if ("-m" in argList or "--minimum-length" in argList) and args.minimum_length is None:
-        args.minimum_length = -1
-    if ("-M" in argList or "--maximum-length" in argList) and args.maximum_length is None:
-        args.maximum_length = -1
-    if ("-l" in argList or "--lives" in argList) and not args.lives:
-        args.lives = -1
-    if ("-d" in argList or "--difficulty" in argList) and not args.difficulty:
-        args.difficulty = ""
 
     # sanity checks
     if args.minimum_length is not None:

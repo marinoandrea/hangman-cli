@@ -45,7 +45,7 @@ class Guess:
     whole_word: bool = False
 
 
-@dataclass
+@dataclass(eq=True)
 class State:
     """
     The state of the system describes the to be guessed word,

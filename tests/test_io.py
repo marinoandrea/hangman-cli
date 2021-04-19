@@ -126,6 +126,11 @@ def test_parse_args_length(capsys: pt.CaptureFixture):
         argList = ["-m", l_tests[3][MIN], "-M", l_tests[2][MAX]]
         parse_args(argList)
 
+    with check_value_error(capsys, "maximum length value too low"):
+        argList = ["-M", "2"]
+        parse_args(argList)
+
+    # value higher than longest word
     with check_value_error(capsys, "The are no words as long as 999 in the game."):
         argList = ["-m", "999", "-M", "1000"]
         parse_args(argList)
@@ -208,6 +213,17 @@ def test_get_guess(monkeypatch: pt.MonkeyPatch, capsys: pt.CaptureFixture):
     assert "opossum" == res.guess and res.whole_word
     capsys.readouterr()  # empty stdout
 
+    # test for zero length input
+    check_prompt(
+        capsys,
+        monkeypatch,
+        partial(get_guess, state),
+        "Please enter your guess: ",
+        "you must guess a character or the entire word",
+        "",
+        "a"
+    )
+
     # while the word has a different length the user is reprompted to guess
     check_prompt(
         capsys,
@@ -247,14 +263,70 @@ def test_initial_display(capsys: pt.CaptureFixture):
 def test_dead_display(capsys: pt.CaptureFixture):
     """
     Tests the display function at the end of a game
-    (when no more guesses can be made.)
+    (when no more guesses can be made) when the player
+    has lost.
     """
-    state = State(target_word="penguin", current_lives=0, guesses=[],
-                  current_guess=Guess("X"))
+    state = State(
+        target_word="penguin",
+        current_lives=0,
+        guesses=[],
+        current_guess=Guess("X"),
+        is_running=False,
+        is_victory=False
+    )
     display(state)
     captured = capsys.readouterr()
-    expected_output = ["Word: _ _ _ _ _ _ _", "Guess: X", ANIMATIONS[MAX_LIVES], ""]
+    expected_output = [
+        "\nSorry, you have lost! 😢\n",
+        "Word: p e n g u i n",
+        "Guess: X",
+        ANIMATIONS[MAX_LIVES],
+        ""
+    ]
     assert captured.out == "\n".join(expected_output)
+
+
+def test_win_display(capsys: pt.CaptureFixture):
+    """
+    Tests the display function at the end of a game
+    (when no more guesses can be made) when the player
+    has won.
+    """
+    state = State(
+        target_word="penguin",
+        current_lives=1,
+        guesses=[],
+        current_guess=Guess(guess="penguin", whole_word=True),
+        is_running=False,
+        is_victory=True
+    )
+    display(state)
+    captured = capsys.readouterr()
+    expected_output = [
+        "\nCongratulations, you have guessed the word! 🥳\n",
+        "Word: p e n g u i n",
+        "Guess: penguin",
+        ANIMATIONS[MAX_LIVES - 1],
+        ""
+    ]
+    assert captured.out == "\n".join(expected_output)
+
+
+def test_bad_state_display(capsys: pt.CaptureFixture):
+    """
+    Tests the display function when an illegal state is
+    passed as an argument.
+    """
+    state = State(
+        target_word="penguin",
+        current_lives=-1,
+        guesses=[],
+        current_guess=Guess(guess="penguin", whole_word=True),
+        is_running=False,
+        is_victory=True
+    )
+    with pt.raises(RuntimeError):
+        display(state)
 
 
 def test_get_play_new_game(

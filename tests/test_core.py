@@ -1,5 +1,7 @@
+from dataclasses import fields
+
 import pytest
-from hangman.core import pick_word, update_game
+from hangman.core import is_word_found, pick_word, update_game
 from hangman.data import Difficulty, Guess, State, WordList
 
 
@@ -77,6 +79,34 @@ def test_update_game():
     assert not state.is_running
     assert not state.is_victory
 
+    # word is found by char guess
+    state = State(
+        target_word="ace",
+        current_lives=1,
+        guesses=[Guess('a'), Guess('c')]
+    )
+    update_game(state, Guess(guess='e'))
+
+    assert state.current_lives == 1
+    assert not state.is_running
+    assert state.is_victory
+
+    # repeated input
+    state = State(
+        target_word="ace",
+        current_lives=1,
+        guesses=[Guess('a'), Guess('c')]
+    )
+    clone = State(
+        target_word="ace",
+        current_lives=1,
+        guesses=[Guess('a'), Guess('c')]
+    )
+
+    update_game(state, Guess(guess='a'))
+
+    assert state == clone
+
 
 def test_pick_word():
     easy_word = pick_word(1, 100, Difficulty.EASY, WordList(
@@ -91,6 +121,11 @@ def test_pick_word():
         easy=["hello"], medium=["world"], hard=["hard"]))
     assert hard_word == "hard"
 
+    # test for empty list
+    with pytest.raises(ValueError):
+        hard_word = pick_word(1, 100, Difficulty.HARD, WordList(
+            easy=["hello"], medium=["world"], hard=[]))
+
 
 def test_pick_word_bad_config():
     with pytest.raises(ValueError):
@@ -98,3 +133,19 @@ def test_pick_word_bad_config():
 
     with pytest.raises(ValueError):
         pick_word(1, 2, Difficulty.EASY, WordList(easy=[], medium=["world"], hard=["hard"]))
+
+
+def test_is_word_found():
+    state = State(
+        target_word="ace",
+        current_lives=2,
+        guesses=[Guess('a'), Guess('c'), Guess('e')]
+    )
+    assert is_word_found(state)
+
+    state = State(
+        target_word="ace",
+        current_lives=2,
+        guesses=[Guess('a'), Guess('c'), Guess('x')]
+    )
+    assert not is_word_found(state)
