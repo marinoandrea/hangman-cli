@@ -3,37 +3,25 @@ This file contains all basic IO tests for the game Hangman.
 This will test whether the basic messages are correctly formatted
 and whether the Player can input data correctly.
 '''
-from contextlib import contextmanager
 from functools import partial
 from io import StringIO
-from typing import Any, Callable, List
+from typing import Any, Callable
 
 import pytest as pt
 from hangman.constants import ANIMATIONS, MAX_LIVES
-from hangman.core import Configurations, Difficulty, Guess, State
+from hangman.core import Difficulty, Guess, State
 from hangman.io import (display, get_guess, get_play_new_game, parse_args,
                         print_error, print_info)
 
 
-def _check_error(capsys: pt.CaptureFixture, expected: str):
+def check_error(capsys: pt.CaptureFixture, expected: str):
     captured = capsys.readouterr()
     assert captured.out == f"\033[31merror: {expected}\033[0m\n"
 
 
-def _check_info(capsys: pt.CaptureFixture, info: str):
+def check_info(capsys: pt.CaptureFixture, info: str):
     captured = capsys.readouterr()
     assert captured.out == f"\033[96minfo: {info}\033[0m\n"
-
-
-@contextmanager
-def check_value_error(capsys: pt.CaptureFixture, err: str):
-    try:
-        yield
-        # expecting ValueError
-        assert False
-    except Exception as e:
-        assert isinstance(e, ValueError)
-        _check_error(capsys, err)
 
 
 def check_prompt(
@@ -60,7 +48,7 @@ def test_print_error(capsys: pt.CaptureFixture):
     actually formatted to be red.
     """
     print_error("test")
-    _check_error(capsys, "test")
+    check_error(capsys, "test")
 
 
 def test_print_info(capsys: pt.CaptureFixture):
@@ -69,7 +57,7 @@ def test_print_info(capsys: pt.CaptureFixture):
     actually formatted to be blue.
     """
     print_info("congratulations, you have won this game!")
-    _check_info(capsys, "congratulations, you have won this game!")
+    check_info(capsys, "congratulations, you have won this game!")
 
 
 def test_parse_args_length(capsys: pt.CaptureFixture):
@@ -77,73 +65,70 @@ def test_parse_args_length(capsys: pt.CaptureFixture):
     Tests whether the arugment parser behaves correctly when
     length is inputted.
     """
-    MIN = 0
-    MAX = 1
-    l_tests = [("4", "7"), ("2", "500"), ("6", "4"), ("0", "2")]
-
     # individual length tests in-range
-    argList: List[str] = ["-m", l_tests[0][MIN]]
-    res = parse_args(argList)
-    assert res.min_length == int(l_tests[0][MIN])
+    args = ["-m", "4"]
+    res = parse_args(args)
+    assert res.min_length == 4
 
-    argList = ["-M", l_tests[0][MAX]]
-    res = parse_args(argList)
-    assert res.max_length == int(l_tests[0][MAX])
+    args = ["-M", "7"]
+    res = parse_args(args)
+    assert res.max_length == 7
 
-    argList = ["--minimum-length", l_tests[0][MIN]]
-    res = parse_args(argList)
-    assert res.min_length == int(l_tests[0][MIN])
+    args = ["--minimum-length", "4"]
+    res = parse_args(args)
+    assert res.min_length == 4
 
-    argList = ["--maximum-length", l_tests[0][MAX]]
-    res = parse_args(argList)
-    assert res.max_length == int(l_tests[0][MAX])
+    args = ["--maximum-length", "7"]
+    res = parse_args(args)
+    assert res.max_length == 7
 
     # # both minimum and maximum test
-    argList = ["-m", l_tests[0][MIN], "-M", l_tests[0][MAX]]
-    res = parse_args(argList)
-    assert res.min_length == int(l_tests[0][MIN])
-    assert res.max_length == int(l_tests[0][MAX])
+    args = ["-m", "4", "-M", "7"]
+    res = parse_args(args)
+    assert res.min_length == 4
+    assert res.max_length == 7
 
-    argList = ["-M", l_tests[1][MAX], "-m", l_tests[1][MIN]]
-    res = parse_args(argList)
-    assert res.min_length == int(l_tests[1][MIN])
-    assert res.max_length == int(l_tests[1][MAX])
+    args = ["-M", "500", "-m", "2"]
+    res = parse_args(args)
+    assert res.min_length == 2
+    assert res.max_length == 500
 
-    argList = [
-        "--maximum-length", l_tests[1][MAX],
-        "--minimum-length", l_tests[1][MIN]
+    args = [
+        "--maximum-length", "500",
+        "--minimum-length", "2"
     ]
-    res = parse_args(argList)
-    assert res.min_length == int(l_tests[1][MIN])
-    assert res.max_length == int(l_tests[1][MAX])
+    res = parse_args(args)
+    assert res.min_length == 2
+    assert res.max_length == 500
 
     # min higher than max
-    with check_value_error(
-            capsys, "minimum length value higher than maximum length value"):
-        argList = ["-m", l_tests[2][MIN], "-M", l_tests[2][MAX]]
-        parse_args(argList)
+    with pt.raises(ValueError):
+        args = ["-m", "6", "-M", "4"]
+        parse_args(args)
+        check_error("minimum length value higher than maximum length value")
 
     # too low values
-    with check_value_error(capsys, "minimum length value too low"):
-        argList = ["-m", l_tests[3][MIN], "-M", l_tests[2][MAX]]
-        parse_args(argList)
+    with pt.raises(ValueError):
+        args = ["-m", "0"]
+        parse_args(args)
+        check_error("minimum length value too low")
 
-    with check_value_error(capsys, "maximum length value too low"):
-        argList = ["-M", "2"]
-        parse_args(argList)
+    with pt.raises(ValueError):
+        args = ["-M", "2"]
+        parse_args(args)
+        check_error("maximum length value too low")
 
     # value higher than longest word
-    with check_value_error(
-            capsys, "The are no words as long as 999 in the game."):
-        argList = ["-m", "999", "-M", "1000"]
-        parse_args(argList)
+    with pt.raises(ValueError):
+        args = ["-m", "999", "-M", "1000"]
+        parse_args(args)
+        check_error("The are no words as long as 999 in the game.")
 
 
 def test_parse_args_lives(capsys: pt.CaptureFixture):
     """
     Tests for the lives argument in the parser.
     """
-    res: Configurations
     for i in range(11, -1, -1):
         try:
             res = parse_args(["-l", str(i)])
@@ -152,11 +137,11 @@ def test_parse_args_lives(capsys: pt.CaptureFixture):
                 assert False
         except Exception as e:
             if i > 10:
-                _check_error(capsys, "that many lives make the game too easy")
+                check_error(capsys, "that many lives make the game too easy")
                 assert isinstance(e, ValueError)
                 continue
             if i < 1:
-                _check_error(capsys, "having less than 1 live is not advised")
+                check_error(capsys, "having less than 1 live is not advised")
                 assert isinstance(e, ValueError)
                 continue
         assert res.lives == i
@@ -164,34 +149,19 @@ def test_parse_args_lives(capsys: pt.CaptureFixture):
     assert res.lives == 5
 
 
-def test_parse_args_difficulty_easy(capsys: pt.CaptureFixture):
+def test_parse_args_difficulty(capsys: pt.CaptureFixture):
     """
     Tests for the lives argument in the parser.
     """
-    res: Configurations
     res = parse_args(["-d", "easy"])
     assert res.difficulty == Difficulty.EASY
 
-
-def test_parse_args_difficulty_medium(capsys: pt.CaptureFixture):
-    """
-    Tests for the lives argument in the parser.
-    """
-    res: Configurations
     res = parse_args(["-d", "medium"])
     assert res.difficulty == Difficulty.MEDIUM
 
-
-def test_parse_args_difficulty_hard(capsys: pt.CaptureFixture):
-    """
-    Tests for the lives argument in the parser.
-    """
-    res: Configurations
     res = parse_args(["-d", "hard"])
     assert res.difficulty == Difficulty.HARD
 
-
-def test_parse_args_difficulty_invalid():
     with pt.raises(ValueError):
         parse_args(["-d", "not_valid"])
 
