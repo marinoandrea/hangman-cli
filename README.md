@@ -134,8 +134,8 @@ The user will have access to instructions on the program's configuration setting
 
 ### Assumptions and Dependencies
 
-The system does not require any external dependency and does not assume anything about the user's platform.
-Although, for an optimal experience (i.e. display of emojis and colors in the terminal) we have the following reccomendations:
+Linux users need to have a version of **GNU C Library** (glibc) greater or equal **v2.29**.
+Although, for an optimal experience (i.e. display of emojis and colors in the terminal) we also have the following reccomendations:
 - **Linux** users are expected to have at least an emoji-capable font (like [Google Noto Color Emoji](https://www.google.com/get/noto/)) installed on their machine.
 - **Windows** users should run the program inside a modern terminal emulator, we strongly suggest to use [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701).
 
