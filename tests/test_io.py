@@ -105,24 +105,25 @@ def test_parse_args_length(capsys: pt.CaptureFixture):
     with pt.raises(ValueError):
         args = ["-m", "6", "-M", "4"]
         parse_args(args)
-        check_error("minimum length value higher than maximum length value")
+    check_error(
+        capsys, "minimum length value higher than maximum length value")
 
     # too low values
     with pt.raises(ValueError):
         args = ["-m", "0"]
         parse_args(args)
-        check_error("minimum length value too low")
+    check_error(capsys, "minimum length value too low")
 
     with pt.raises(ValueError):
         args = ["-M", "2"]
         parse_args(args)
-        check_error("maximum length value too low")
+    check_error(capsys, "maximum length value too low")
 
     # value higher than longest word
     with pt.raises(ValueError):
         args = ["-m", "999", "-M", "1000"]
         parse_args(args)
-        check_error("The are no words as long as 999 in the game.")
+    check_error(capsys, "The are no words as long as 999 in the game.")
 
 
 def test_parse_args_lives(capsys: pt.CaptureFixture):
