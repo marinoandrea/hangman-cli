@@ -34,12 +34,12 @@ This document is intended for implementers(testing and developing) of this speci
 
 ### Scope
 
-There is one software product: the hangman game.
+In this project, there is one software product: the hangman game.
 This product performs the interaction with the Player and the management of a game.
 The hangman game does not make use of a leaderboard or any other statistics not required for a game instance.
 In addition, the game can only be played on one machine and the game product does not make use of any kind of network communication.
 
-The goal of the hangman game product is to provide an application to play the similar named game.
+The goal of the hangman game product is to provide an application to play the similarly named game.
 
 ### Intended Audience and Reading Suggestions
 
@@ -78,16 +78,16 @@ A user is advised to continue reading the section on external interfaces.
 
 - **Lives**: The limit of the number of wrong guesses that the Player can make.
 
-- **State**: The state of the system describes the to be guessed word, all the wrongly guessed characters, the current progress of the word, the number of Lives and the configuration options.
+- **State**: The state of the system describes the to be guessed word, all the guessed characters, the current progress of the word, the number of Lives and the configuration options.
 
-- **Game instance**: A Game instance starts when a word has been chosen by the system and it ends when the Player has either guessed the word, or lost all its Lives while guessing the words.
+- **Game instance**: A Game instance starts when a word has been chosen by the system and it ends when the Player has either guessed the word or lost all its Lives.
 
 - **Game Character**: A Game Character is defined as an ASCII character in the range 97 - 122.
 
 - **Game Word**: A Game Word is any string containing only Game Characters.
 
-- **Game Dictionary**: A collection of files embedded in the program containing lists of Game Words classified by their _Difficulty_ into three groups(easy, medium, hard).
-  The groups are determined based of the median difficulty of words in one file.
+- **Game Dictionary**: A collection of files embedded in the program containing lists of Game Words classified by their Difficulty into three groups(easy, medium, hard).
+  The groups are determined based on the median difficulty of words in one file.
 
 ### References
 
@@ -101,22 +101,19 @@ The hangman game product is completely self-contained. It is based on an already
 
 ### Product Functions
 
-The user must be able to perform certain actions in the game. The list of actions is as follows:
+The Player must be able to perform certain actions in the game, which are as follows:
+Below, we list the actions the Player can perform:
 
-- Write a letter of the alphabet as a guess, either with or without capital.
-- Change the difficulty, with options easy, medium and hard.
-- Change the minimum and maximum word length.
-- Change the number of lives that a player has ranging from 1 to 10.
+- Write a letter of the alphabet as a guess, either uppercase or lowercase.
+- Configure the difficulty, with options easy, medium or hard.
+- Configure the minimum and maximum length of a word that the game can choose.
+- Configure the number of lives that a player has ranging from 1 to 10.
 - Restart the game when it is over.
 
 ### Userclasses and Characteristics
 
 - People who can speak English. The game is supposed to be played by people who know English.
-- TAs. In this particular instance, the game is made for the teaching assistents and this course.
-- Students that are also inrolled in this course will test our game.
-
-We aim to mostly satisfy the TAs and students, so that they will have a proper game to test and grade. We try to achieve this by testing our game thoroughly, as to minimize errors in the game.
-The native language of the students and TAs mostly is not English. However, we know that the people who follow this course are well educated adults that can speak English well. The wordlists we use are of an appropriate difficulty level.
+  The wordlist we use are of a English dictionary, and can be configured based on difficulty to support various levels of fluency.
 
 ### Operating Environment
 
@@ -134,10 +131,9 @@ The user will have access to instructions on the program's configuration setting
 
 ### Assumptions and Dependencies
 
+It is assumed that Windows users have a version of Windows 10 installed.
+
 Linux users need to have a version of **GNU C Library** (glibc) greater or equal **v2.29**.
-Although, for an optimal experience (i.e. display of emojis and colors in the terminal) we also have the following reccomendations:
-- **Linux** users are expected to have at least an emoji-capable font (like [Google Noto Color Emoji](https://www.google.com/get/noto/)) installed on their machine.
-- **Windows** users should run the program inside a modern terminal emulator, we strongly suggest to use [Windows Terminal](https://www.microsoft.com/en-us/p/windows-terminal/9n0dx20hk701).
 
 ## **External Interface Requirements**
 
@@ -157,13 +153,13 @@ The Player can customize the game using the following command line options:
 
 #### Hardware interfaces
 
-The system is purely made out of software components.
+The system is purely made out of software components, and can be interacted with using basic input from a keyboard.
 
 #### Software interfaces
 
 The system relies on the underlying OS implementation of basic I/O in order to receive `stdinput` via a terminal and to output to the `stdoutput`.
-The Windows release of the system will work on any machine running Windows 8 or newer.
-The GNU/Linux release of the system will work on any machine running a Linux distribution.
+The Windows release of the system will work on any machine running Windows 10.
+The GNU/Linux release of the system will work on any machine running a Linux distribution fulfilling the dependencies.
 
 #### Communications interfaces
 
@@ -171,19 +167,19 @@ The system relies solely on the CLI in order to provide interactive functionalit
 
 #### Memory constraints
 
-The user's machine should have a minimum of 50Mb of free RAM in order to run this application.
+The user's machine should have a minimum of 100MB of free RAM in order to run this application.
 This constraint accounts for both the Python runtime size and the program size.
 
 ## System Features
 
 ### Minimum length
 
-The minimum length feature allows a user to specify a minimum length for the word to be guessed. This feature has
-a low priority, because the game can be played without the minimum length feature included.
+The minimum length feature allows a user to specify a minimum length for the word to be guessed.
+This feature has a low priority, because the game can be played without the minimum length feature included.
 
 #### Stimulus/Response
 
-The Player shall set the minimum length via the `-m` or `--minimum-length` option followed by an integer argument.
+The Player shall set the minimum length of a word that the game can choose via the `-m` or `--minimum-length` option followed by an integer argument.
 There is no response from the system, but for the remainder of the program the length of every guess word shall be of atleast the
 specified length.
 
@@ -200,10 +196,11 @@ specified length.
 ### Maximum length
 
 The maximum length feature allows a user to specify the maximum length for the word to be guessed in a game instance.
+This feature has a low priority, because the game is playable without it.
 
 #### Stimulus/Response
 
-The Player shall set the maximum length via the `-M` or `--maximum-length` option followed by an integer argument.
+The Player shall set the maximum length of a word that the game can choose via the `-M` or `--maximum-length` option followed by an integer argument.
 There is no response from the system, but for the remainder of the program the length of every guess word shall be no more
 than the specified length.
 
@@ -217,6 +214,7 @@ than the specified length.
 
 The lives feature allows a user to specify the number of lives in a game instance. This corresponds to the amount of guesses
 a Player has.
+This feature has a low priority, because the game is playable with a default value.
 
 #### Stimulus/Response
 
@@ -234,6 +232,7 @@ There is no response from the system, but for the remainder of the program the n
 ### Difficulty
 
 The difficulty feature allows a user to specify the difficulty of to be guessed words.
+This feature has a low priority, because the game is playable with a wordlist not categorised on difficulty.
 
 #### Stimulus/Response
 
@@ -254,6 +253,8 @@ There is no response from the system, but for the remainder of the program the w
 
 The multiple games feature allows a user to play multiple games during one invocation of the program.
 This feature does not allow to play multiple games simultaneously.
+This feature has a medium priority, because a Player can rerun the executable to start a new game,
+but the experience is much smoother when a new game can be started during the same invocation.
 
 #### Stimulus/Response
 
@@ -263,17 +264,19 @@ the system shall stop the program, play a new game, or reask te question.
 #### Functional
 
 - FREQ-5.1: After ending a game instance, the system shall
-  ask the player to play another game by asking for command-line input of the form of 'y' or 'n'.
-- FREQ-5.2: If the provided input is not 'y' nor 'n', the system shall
+  ask the player to play another game by asking for command-line input of the form of either 'y' or 'n'.
+- FREQ-5.2: If the provided input is neither 'y' nor 'n', the system shall
   repeat the question.
 - FREQ-5.3: A Keyboard Interrupt or an EOF character shall be interpreted identical
   to a 'n' input.
-- FREQ-5.4: If the Player inputs 'y', the system shall start a new game instance.
-- FREQ-5.5: If the Player inputs 'n', the system shall gracefully exit.
+- FREQ-5.4: If the Player enters 'y', the system shall start a new game instance.
+- FREQ-5.5: If the Player enters 'n', the system shall gracefully exit.
 
 ### Game Information
 
 The game information feature provides information about the current state of the game to the Player during a game instance.
+This feature has a high priority, because it contains the information to display to the Player which makes
+the game playable from the Players perspective.
 
 #### Stimulus/Response
 
@@ -290,6 +293,8 @@ The system shall display the current state on the terminal device. There is no r
 ### Player guessing
 
 The player guessing feature allows a Player to perform a guess for a Game character or a Game word.
+This feature has a high priority, because without, the Player has no way to input and proceed the
+game state.
 
 #### Stimulus/Response
 
@@ -299,26 +304,30 @@ valid Game String.
 #### Functional
 
 - FREQ-7.1: To perform a guess, the system must ask the Player via command-line input.
-- FREQ-7.2: If the guess by the Player is not a valid Game String or Game Character,
-  the system shall inform the Player that it is not and redo the input request.
-- FREQ-7.3: If the guess is a valid Game String, but the length of the guess is not equal
+- FREQ-7.2: If the guess by the Player is not a valid Game String, Game Character, or
+  upper case Game Character, the system shall inform the Player that it is not and redo the input request.
+- FREQ-7.3: Game Characters in upper case shall be converted to their lower case form by the system,
+  and further processed as a lower case Game Character.
+- FREQ-7.4: If the guess is a valid Game String, but the length of the guess is not equal
   to the length of the Game String, the system shall inform the Player and redo the input request.
-- FREQ-7.4: If the guess is valid and not a duplicate, but the guessed Game Character is not part of the Game String,
+- FREQ-7.5: If the guess is valid and not a duplicate, but the guessed Game Character is not part of the Game String,
   the system shall substract one 'life' from the amount of 'lives'.
-- FREQ-7.5: If the guess is valid, a Game String, and not a duplicate, but not equal to the to be guessed Game String,
+- FREQ-7.6: If the guess is valid, a Game String, and not a duplicate, but not equal to the to be guessed Game String,
   the system shall substract one 'life' from the amount of 'lives'.
-- FREQ-7.6: If the guess is valid, but a duplicate, the system shall inform the player that it is a duplicate and
+- FREQ-7.7: If the guess is valid, but a duplicate, the system shall inform the player that it is a duplicate and
   not substract any lives.
-- FREQ-7.7: If the Player inputs a EOF character or performs a Keyboard Interrupt during input, the system
+- FREQ-7.8: If the Player inputs a EOF character or performs a Keyboard Interrupt during input, the system
   shall end the corresponding Game Instance.
 
 ### Winner/Loser
 
 The Winner/Loser feature assign a win-condition to the game.
+This feature has a high priority, because it transforms the guessing into a game. Without
+this feature, a Player can make an infinite amount of guesses.
 
 #### Functional
 
-- FREQ-8.1: The win-condition is if the word is completely guessed, either via Game Character guessing
+- FREQ-8.1: The win-condition is that the word is completely guessed, either via Game Character guessing
   or via Game String guessing, before the amount of lives reach zero.
 - FREQ-8.2: If the amount of lives reach zero before the word is guessed, the
   system shall inform the Player they lost and display the actual word.
@@ -329,6 +338,8 @@ The Winner/Loser feature assign a win-condition to the game.
 ### Graceful exits
 
 The graceful exits feature provides an indication to the user when the exit was done gracefully.
+This feature has a low priority, because it does not interfere with the playability of the game.
+However, it provides a clear distinction to the Player when the program exists normally and when not.
 
 #### Stimulus/Response
 
@@ -339,32 +350,15 @@ The player shall get a message on the command-line when the system gracefully ex
 - FREQ-9.1: When the system gracefully exits, it shall thank the Player for playing via
   a command-line message.
 
-### Coloured output
-
-The coloured output feature provides a clear distinction
-between the different type of messages.
-
-#### Functional
-
-- FREQ-10.1: The system shall print error messages to the Player with red as the foreground color via escape code '31' in the terminal.
-
-- FREQ-10.2: The system shall print informational messages to the Player with light cyan as the foreground color via escape code '96' in the terminal.
-
-- FREQ-10.3: The system shall print regular messages to the Player without any color modifications from our side.
-
 ## _Other Nonfunctional Requirements_
 
 ### Performance requirements
 
-The system shall execute the game's logic for each turn in under 2 seconds on any system with the following minimum configuration:
+The system shall execute the game's logic for each turn in under 2 seconds for input words of length within the range 2-999, on any system with the following minimum configuration, and with available CPU utilization:
 
-- 2.6Ghz 2 core CPU
+- 2 core CPU clocked @2.6Ghz
 - 4GB of DDR3/DDR4 RAM
 - SSD/HDD with 100MB/s write speed
-
-### Safety Requirements
-
-The system shall not, in any way, render the user's system unoperable while it is running.
 
 ### Security Requirements
 
@@ -377,7 +371,7 @@ The system shall be built according to industry standards and its development pr
 - Continuous Integration system
   - build shall be `passing` before release
 - Code coverage monitoring
-  - test code coverage shall be over 90% before release
+  - test code path coverage shall be over 90% before release
 - reasonable versioning and coding policies including:
   - meaningful and documented commits
   - source level documentation for the core functionalities

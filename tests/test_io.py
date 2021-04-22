@@ -16,12 +16,12 @@ from hangman.io import (display, get_guess, get_play_new_game, parse_args,
 
 def check_error(capsys: pt.CaptureFixture, expected: str):
     captured = capsys.readouterr()
-    assert captured.out == f"\033[31merror: {expected}\033[0m\n"
+    assert captured.out == f"error: {expected}\n"
 
 
 def check_info(capsys: pt.CaptureFixture, info: str):
     captured = capsys.readouterr()
-    assert captured.out == f"\033[96minfo: {info}\033[0m\n"
+    assert captured.out == f"info: {info}\n"
 
 
 def check_prompt(
@@ -37,7 +37,7 @@ def check_prompt(
     res = prompt_fun()
     captured = capsys.readouterr()
     assert captured.out == (
-        f"{prompt_msg}\033[31merror: {expected_err}\033[0m\n{prompt_msg}"
+        f"{prompt_msg}error: {expected_err}\n{prompt_msg}"
     )
     return res
 
@@ -251,7 +251,7 @@ def test_dead_display(capsys: pt.CaptureFixture):
     display(state)
     captured = capsys.readouterr()
     expected_output = [
-        "\nSorry, you have lost! 😢\n",
+        "\nSorry, you have lost!\n",
         "Word: p e n g u i n",
         "Guess: X",
         ANIMATIONS[MAX_LIVES],
@@ -277,7 +277,7 @@ def test_win_display(capsys: pt.CaptureFixture):
     display(state)
     captured = capsys.readouterr()
     expected_output = [
-        "\nCongratulations, you have guessed the word! 🥳\n",
+        "\nCongratulations, you have guessed the word!\n",
         "Word: p e n g u i n",
         "Guess: penguin",
         ANIMATIONS[MAX_LIVES - 1],

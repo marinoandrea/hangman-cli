@@ -1,6 +1,5 @@
 import json
 from argparse import ArgumentParser
-from enum import Enum, unique
 from functools import wraps
 from typing import Callable, List
 
@@ -9,24 +8,12 @@ from hangman.data import Configurations, Difficulty, Guess, State, WordList
 from hangman.utils import cached, get_resource_path
 
 
-@unique
-class colors(Enum):
-    value: str
-
-    RED = '\033[31m'
-    END = '\033[0m'
-    BLUE = '\033[96m'
-
-    def __str__(self) -> str:
-        return self.value
-
-
 def print_error(string: str):
-    print(f"{colors.RED}error: {string}{colors.END}")
+    print(f"error: {string}")
 
 
 def print_info(string: str):
-    print(f"{colors.BLUE}info: {string}{colors.END}")
+    print(f"info: {string}")
 
 
 @cached
@@ -178,9 +165,9 @@ def display(state: State):
 
     if not state.is_running:
         if state.is_victory:
-            print('\nCongratulations, you have guessed the word! 🥳\n')
+            print('\nCongratulations, you have guessed the word!\n')
         else:
-            print('\nSorry, you have lost! 😢\n')
+            print('\nSorry, you have lost!\n')
         print(f"Word: {' '.join(c for c in state.target_word)}")
     else:
         # print current word based on the list of guesses
