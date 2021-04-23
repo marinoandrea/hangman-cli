@@ -35,7 +35,7 @@ def main():
             # NOTE(andrea): this is just for aesthetic purposes
             print('\n')
 
-    print('Thank your for playing 😀')
+    print('Thank your for playing')
 
 
 if __name__ == '__main__':
