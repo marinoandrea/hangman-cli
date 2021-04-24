@@ -11,6 +11,7 @@ pytest = "*"
 pyinstaller = "*"
 pytest-cov = "*"
 pywin32-ctypes = "*"
+mutpy = "*"
 
 [packages]
 
@@ -20,6 +21,7 @@ python_version = "3.9"
 [scripts]
 test = "coverage run -m pytest"
 test-dev = "pytest --cov=. -v"
+test-mut = "mut.py --target hangman --unit-test tests"
 start = "python main.py"
 build-linux = "pyinstaller --onefile main.py --add-data \"assets/wordlists.json:assets\" --name hangman-cli_linux_x64"
 build-windows = "pyinstaller --onefile main.py --add-data \"assets/wordlists.json;assets\" --name hangman-cli_win_x64"
